@@ -20,6 +20,7 @@ tag_gagner = "gagner"
 tag_limbo = "limbo"
 tag_tuto = "tuto"
 tag_kitsoin = "kitsoin"
+tag_transition = "transition"
 
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
@@ -187,7 +188,9 @@ class Limbo():
 
 class Carte():
     def __init__(self):
-        self.lab = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
+        self.niveau_1 = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
+        self.niveau_2 = pnm.pbm_vers_matrice("./cartes/niveau_2.pbm")
+        self.niveau_3 = pnm.pbm_vers_matrice("./cartes/niveau_3.pbm")
         self.tuto = pnm.pbm_vers_matrice("./interface/tuto/tuto.pbm")
         self.bouger = pnm.pbm_vers_matrice("./interface/tuto/bouger.pbm")
         self.sante = pnm.pbm_vers_matrice("./interface/tuto/sante.pbm")
@@ -202,16 +205,17 @@ class Carte():
         if self.niv_chargeur == 0 and brickman.vie_etat == True:
             self.tutoriel()
             self.sortie_tuto()
-        if self.niv_chargeur == 1 and brickman.vie_etat == True:
+        if self.niv_chargeur > 0 and brickman.vie_etat == True:
             self.tic = 1000
             self.labyrinthe()
 
     def labyrinthe(self):
-        columns, lines = pnm.dimensions(self.lab)
-        for i in range(columns):
-            for j in range(lines):
-                if self.lab[i][j] == 1:
-                    carre(cord_transformer(j, i, delta), "white", "black", tag_mure)
+        if self.niv_chargeur == 1:
+            affiche_matrice(self.niveau_1, 0, 0, delta, "white", "black", tag_mure)
+        if self.niv_chargeur == 2:
+            affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mure)
+        if self.niv_chargeur == 3:
+            affiche_matrice(self.niveau_3, 0, 0, delta, "white", "black", tag_mure)
     
     def tutoriel(self):            
         carre(cord_transformer(10,20, delta), "pink", "black", tag_tuto)
@@ -225,8 +229,15 @@ class Carte():
         return False
 
     def collision(self, x, y):
-        if self.lab[y][x] == 1:
-            return True
+        if self.niv_chargeur == 1:
+            if self.niveau_1[y][x] == 1:
+                return True
+        elif self.niv_chargeur == 2:
+            if self.niveau_2[y][x] == 1:
+                return True
+        elif self.niv_chargeur == 3:
+            if self.niveau_3[y][x] == 1:
+                return True
         return False
 
     def sortie_tuto(self):
@@ -401,13 +412,30 @@ class Etat():
         self.tic = 1
         self.gagner_X = 3  #49
         self.gagner_Y = 2  #37
+        self.transition_X = 3
+        self.transition_Y = 2
+        self.transition_etat = False
         self.affichage()
         
     def affichage(self):
         Dessin.delete(tag_gagner)
-        if carte.niv_chargeur == 1 and brickman.vie_etat == True:
-            self.gagner()
+        Dessin.delete(tag_transition)
+        if carte.niv_chargeur > 0:
+            self.transition()
     
+    def transition(self):
+        carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
+        if self.transition_X == brickman.position_X and self.transition_Y == brickman.position_Y and self.transition_etat == False:
+            carte.niv_chargeur += 1
+            Dessin.delete(tag_mure)
+            Dessin.delete(tag_adversaire)
+            Dessin.delete(tag_kitsoin)
+            Dessin.delete(tag_brickman)
+            carte.affichage()
+            self.transition_etat = True
+        elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
+            self.transition_etat = False
+
     def gagner(self):
         carre(cord_transformer(self.gagner_X, self.gagner_Y, delta), "green", "black", tag_gagner)
         if self.gagner_X == brickman.position_X and self.gagner_Y == brickman.position_Y:
@@ -444,10 +472,8 @@ class Objet():
             if brickman.sante + self.kitsoin_bonus > 100:
                 return
             else:
-                print(f'sante -> {brickman.sante}')
                 self.kitsoin_positions.remove((brickman.position_X, brickman.position_Y))
                 brickman.sante += self.kitsoin_bonus
-                print(f'sante apres -> {brickman.sante}')
 
 
 carte = Carte()

@@ -173,6 +173,7 @@ class Limbo():
                 brickman.deplacement_etat = False
                 brickman.vie_etat = True
                 brickman.sante = 100
+                objet.kitsoin_etat = False
                 brickman.position_X = 0
                 brickman.position_Y = 1
                 Dessin.delete(tag_limbo)
@@ -354,6 +355,7 @@ class Brickman():
             Dessin.delete(tag_interface)
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_gagner)
+            Dessin.delete(tag_kitsoin)
             carte.tic = 10
             self.vie_etat = False
             if not self.deplacement_etat:
@@ -418,6 +420,7 @@ class Objet():
         self.tic = 10
         self.kitsoin_bonus = 10 
         self.kitsoin_positions = {(1, 1)}
+        self.kitsoin_etat = True
         self.affichage()
     
     def affichage(self):
@@ -432,7 +435,9 @@ class Objet():
             carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
-        pass
+        if self.kitsoin_etat == False:
+             self.kitsoin_positions = {(1, 1)}
+             self.kitsoin_etat = True
     
     def kitsoin_utilisation(self):
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:

@@ -209,8 +209,9 @@ class Limbo():
                 brickman.vie_etat = True
                 brickman.sante = 100
                 objet.kitsoin_etat = False
-                brickman.position_X = 0
-                brickman.position_Y = 1
+                if carte.niv_chargeur == 4:
+                    brickman.position_X = 30
+                    brickman.position_Y = 30
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()
                 etat.affichage()           
@@ -408,6 +409,7 @@ class Brickman():
             Dessin.delete(tag_gagner)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_transition)
+            Dessin.delete(tag_boss)
             carte.tic = 10
             self.vie_etat = False
             if not self.deplacement_etat:
@@ -429,7 +431,7 @@ class Adversaire():
         if carte.niv_chargeur == 4:
             self.position_X = -1
             self.position_Y = -1
-        if carte.niv_chargeur >= 1 and carte.niv_chargeur < 4 and brickman.vie_etat == True:
+        if carte.niv_chargeur >= 1 and carte.niv_chargeur < 4 and brickman.vie_etat:
             self.deplacement()
             self.creer_guerrier()
             self.tic = 500
@@ -537,10 +539,13 @@ class Boss():
         self.position_Y = 4
         self.sante = 200
         self.boss = pnm.ppm_vers_matrice("./entité/boss.ppm")
+        self.longueur_boss = self.boss[0]
+        self.hauteur_boss = len(self.boss) 
         self.affichage()
 
     def affichage(self):
-        if carte.niv_chargeur == 4:
+        Dessin.delete(tag_boss)
+        if carte.niv_chargeur == 4 and brickman.vie_etat:
             self.creer_boss()
             self.dommage()
 
@@ -555,10 +560,9 @@ class Boss():
     
     def cords_boss(self):
         cords = []
-        cords.append((self.position_X, self.position_Y))
-        cords.append((self.position_X + 1, self.position_Y))
-        cords.append((self.position_X, self.position_Y+1))
-        cords.append((self.position_X+1, self.position_Y+1))
+        for i in range(6):
+            for j in range(6):
+                cords.append((self.position_X+i, self.position_Y+j))
         return cords
 
 carte = Carte()

@@ -412,6 +412,8 @@ class Brickman():
     
     def mort(self):
         if self.sante <= 0:
+            if not self.deplacement_etat: 
+                Dessin.delete(tag_brickman)
             Dessin.delete(tag_mure)
             Dessin.delete(tag_transition)
             Dessin.delete(tag_kitsoin)
@@ -467,6 +469,7 @@ class Etat():
         self.transition_X = 3
         self.transition_Y = 5
         self.transition_etat = False
+        self.ecran_noir = "./interface/limbo/ecran_noir.pbm"
         self.affichage()
         
     def affichage(self):
@@ -477,7 +480,7 @@ class Etat():
             self.ecran_noir()
     
     def ecran_noir(self):
-        affiche_matrice("./interface/limbo/ecran_noir.pbm", 0, 0, delta, "black", "black", tag_ecran_noir)
+        affiche_matrice(self.ecran_noir, 0, 0, delta, "black", "black", tag_ecran_noir)
 
     def transition(self):
         carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
@@ -544,8 +547,8 @@ class Boss():
     def __init__(self):
         self.tic = 10
         self.temps = 10
-        self.position_X = 4
-        self.position_Y = 4
+        self.position_X = 10
+        self.position_Y = 10
         self.sante = 200
         self.boss = pnm.ppm_vers_matrice("./entité/boss.ppm")
         self.longueur_boss = self.boss[0]
@@ -559,7 +562,8 @@ class Boss():
             self.dommage()
 
     def creer_boss(self):
-        affiche_matrice_rgb(self.boss, self.position_X, self.position_Y, delta, "black", tag_boss)
+        for cords in self.cords_boss():
+            carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
 
 
     def dommage(self):

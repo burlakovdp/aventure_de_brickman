@@ -367,6 +367,7 @@ class Brickman():
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_gagner)
             Dessin.delete(tag_kitsoin)
+            Dessin.delete(tag_transition)
             carte.tic = 10
             self.vie_etat = False
             if not self.deplacement_etat:
@@ -413,14 +414,14 @@ class Etat():
         self.gagner_X = 3  #49
         self.gagner_Y = 2  #37
         self.transition_X = 3
-        self.transition_Y = 2
+        self.transition_Y = 1
         self.transition_etat = False
         self.affichage()
         
     def affichage(self):
         Dessin.delete(tag_gagner)
         Dessin.delete(tag_transition)
-        if carte.niv_chargeur > 0:
+        if carte.niv_chargeur > 0 and carte.niv_chargeur < 4 and brickman.vie_etat:
             self.transition()
     
     def transition(self):
@@ -453,7 +454,7 @@ class Objet():
     
     def affichage(self):
         Dessin.delete(tag_kitsoin)
-        if carte.niv_chargeur > 0:
+        if carte.niv_chargeur > 0 and brickman.vie_etat:
             self.kitsoin_utilisation()
             self.position_chargeur()
             self.creer_kitsoin()

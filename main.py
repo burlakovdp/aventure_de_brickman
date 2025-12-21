@@ -21,6 +21,7 @@ tag_limbo = "limbo"
 tag_tuto = "tuto"
 tag_kitsoin = "kitsoin"
 tag_transition = "transition"
+tag_boss = "boss"
 
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
@@ -63,8 +64,11 @@ class Interface():
         self.temps = 0
         self.tic = 10
         self.sante_statut_etat = False
-        self.sante_position_X0 = 1
-        self.sante_position_Y = 39 
+        self.brickman_sante_position_X0 = 1
+        self.brickman_sante_position_Y = 39
+        self.boss_sante_position_X0 = 1
+        self.boss_sante_position_Y = 1
+        self.ligne_sante = 47
         self.lampe = pnm.ppm_vers_matrice("./interface/logo/lampe.ppm")
         self.lumiere = pnm.ppm_vers_matrice("./interface/logo/lumiere.ppm")
         self.titre = pnm.ppm_vers_matrice("./interface/logo/titre.ppm")
@@ -89,8 +93,10 @@ class Interface():
         if self.projet_etat:
             self.creer_projet()
         if carte.niv_chargeur >= 0 and brickman.vie_etat:
-            self.sante_statut()
+            self.brickman_sante_statut()
             #self.sante_statut_etat = True
+        if carte.niv_chargeur == 4 and brickman.vie_etat:
+            self.boss_sante_statut()
         
     def creer_lignes(self, delta):
         x0 = 3
@@ -134,12 +140,40 @@ class Interface():
     def creer_lumiere_lampe(self):
         affiche_matrice_rgb(self.lumiere, 33, 6, delta, "black", tag_interface)
 
-    def sante_statut(self):
-        sante_counter = (brickman.sante*47)//100
-        for i in range(sante_counter):
-            carre(cord_transformer(self.sante_position_X0+i, self.sante_position_Y, delta), "red", "black", tag_interface)
-        for i in range(47-sante_counter):
-            carre(cord_transformer(sante_counter+i+1, self.sante_position_Y, delta), "black", "red", tag_interface)
+    def brickman_sante_statut(self):
+        brick_counter = (brickman.sante*self.ligne_sante)//100
+        for i in range(brick_counter):
+            carre(cord_transformer(self.brickman_sante_position_X0+i, self.brickman_sante_position_Y, delta), "red", "black", tag_interface)
+        for i in range(self.ligne_sante-brick_counter):
+            carre(cord_transformer(brick_counter+i+1, self.brickman_sante_position_Y, delta), "black", "red", tag_interface)
+        
+    def boss_sante_statut(self):
+        brick_counter = (boss.sante*self.ligne_sante*2)//200
+        #print(brick_counter)
+        if brick_counter < self.ligne_sante:
+            #ligne 1
+            for i in range(self.ligne_sante):
+                carre(cord_transformer(self.boss_sante_position_X0+i, self.boss_sante_position_Y+1, delta), "black", "red", tag_interface)
+            for i in range(self.ligne_sante - (brick_counter%self.ligne_sante)):
+                    carre(cord_transformer((brick_counter%self.ligne_sante)+i+1, self.boss_sante_position_Y, delta), "black", "red", tag_interface)
+            #ligne 0
+            for i in range(brick_counter):
+                carre(cord_transformer(self.boss_sante_position_X0+i, self.boss_sante_position_Y, delta), "red", "black", tag_interface)
+        else:
+            #ligne 0
+            for i in range(self.ligne_sante):
+                carre(cord_transformer(self.boss_sante_position_X0+i, self.boss_sante_position_Y, delta), "red", "black", tag_interface)
+            #ligne 1
+            if brick_counter == self.ligne_sante*2:
+                for i in range(self.ligne_sante):
+                    carre(cord_transformer(self.boss_sante_position_X0+i, self.boss_sante_position_Y+1, delta), "red", "black", tag_interface)
+            else:
+                for i in range(brick_counter%self.ligne_sante):
+                    carre(cord_transformer(self.boss_sante_position_X0+i, self.boss_sante_position_Y+1, delta), "red", "black", tag_interface)
+                
+                for i in range(self.ligne_sante - (brick_counter%self.ligne_sante)):
+                    carre(cord_transformer((brick_counter%self.ligne_sante)+i+1, self.boss_sante_position_Y+1, delta), "black", "red", tag_interface)
+                
 
 class Limbo():
     def __init__(self):
@@ -467,7 +501,7 @@ class Objet():
         self.temps = 0
         self.tic = 10
         self.kitsoin_bonus = 10 
-        self.kitsoin_positions = {(1, 1)}
+        self.kitsoin_positions = {(20, 20)}
         self.kitsoin_etat = True
         self.affichage()
     
@@ -484,7 +518,7 @@ class Objet():
 
     def position_chargeur(self):
         if self.kitsoin_etat == False:
-             self.kitsoin_positions = {(1, 1)}
+             self.kitsoin_positions = {(0, 0)}
              self.kitsoin_etat = True
     
     def kitsoin_utilisation(self):
@@ -499,10 +533,33 @@ class Boss():
     def __init__(self):
         self.tic = 10
         self.temps = 10
+        self.position_X = 4
+        self.position_Y = 4
+        self.sante = 200
+        self.boss = pnm.ppm_vers_matrice("./entité/boss.ppm")
         self.affichage()
 
     def affichage(self):
-        pass
+        if carte.niv_chargeur == 4:
+            self.creer_boss()
+            self.dommage()
+
+    def creer_boss(self):
+        affiche_matrice_rgb(self.boss, self.position_X, self.position_Y, delta, "black", tag_boss)
+
+
+    def dommage(self):
+        cords_brickman = (brickman.position_X, brickman.position_Y)
+        if cords_brickman in self.cords_boss():
+            brickman.sante -= 1
+    
+    def cords_boss(self):
+        cords = []
+        cords.append((self.position_X, self.position_Y))
+        cords.append((self.position_X + 1, self.position_Y))
+        cords.append((self.position_X, self.position_Y+1))
+        cords.append((self.position_X+1, self.position_Y+1))
+        return cords
 
 carte = Carte()
 brickman = Brickman()
@@ -599,10 +656,12 @@ root.bind('<Right>', brickman.deplacer_droite)
 tictac_carte()
 tictac_objet()
 tictac_brickman()
+tictac_boss()
 tictac_adversaire()
 tictac_interface()
 tictac_etat()
 tictac_limbo()
+
 
 
 root.mainloop()

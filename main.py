@@ -191,6 +191,7 @@ class Carte():
         self.niveau_1 = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
         self.niveau_2 = pnm.pbm_vers_matrice("./cartes/niveau_2.pbm")
         self.niveau_3 = pnm.pbm_vers_matrice("./cartes/niveau_3.pbm")
+        self.niveau_boss = pnm.pbm_vers_matrice("./cartes/boss_carte.pbm")
         self.tuto = pnm.pbm_vers_matrice("./interface/tuto/tuto.pbm")
         self.bouger = pnm.pbm_vers_matrice("./interface/tuto/bouger.pbm")
         self.sante = pnm.pbm_vers_matrice("./interface/tuto/sante.pbm")
@@ -216,6 +217,8 @@ class Carte():
             affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mure)
         if self.niv_chargeur == 3:
             affiche_matrice(self.niveau_3, 0, 0, delta, "white", "black", tag_mure)
+        if self.niv_chargeur == 4:
+            affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
     
     def tutoriel(self):            
         carre(cord_transformer(10,20, delta), "pink", "black", tag_tuto)
@@ -237,6 +240,9 @@ class Carte():
                 return True
         elif self.niv_chargeur == 3:
             if self.niveau_3[y][x] == 1:
+                return True
+        elif self.niv_chargeur == 4:
+            if self.niveau_boss[y][x] == 1:
                 return True
         return False
 
@@ -386,10 +392,13 @@ class Adversaire():
     
     def affichage(self):
         Dessin.delete(tag_adversaire)
-        if carte.niv_chargeur >= 1 and brickman.vie_etat == True:
+        if carte.niv_chargeur == 4:
+            self.position_X = -1
+            self.position_Y = -1
+        if carte.niv_chargeur >= 1 and carte.niv_chargeur < 4 and brickman.vie_etat == True:
             self.deplacement()
             self.creer_guerrier()
-            self.tic = 1000
+            self.tic = 500
 
     def creer_guerrier(self):
         carre(cord_transformer(self.position_X, self.position_Y, delta), "red", "black", tag_adversaire)
@@ -432,6 +441,16 @@ class Etat():
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_brickman)
+            print(f'niveau = {carte.niv_chargeur}')
+            if carte.niv_chargeur == 1:
+                pass
+            elif carte.niv_chargeur == 2:
+                pass
+            elif carte.niv_chargeur == 3:
+                pass
+            elif carte.niv_chargeur == 4:
+                brickman.position_X = 2
+                brickman.position_Y = 20
             carte.affichage()
             self.transition_etat = True
         elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
@@ -476,6 +495,14 @@ class Objet():
                 self.kitsoin_positions.remove((brickman.position_X, brickman.position_Y))
                 brickman.sante += self.kitsoin_bonus
 
+class Boss():
+    def __init__(self):
+        self.tic = 10
+        self.temps = 10
+        self.affichage()
+
+    def affichage(self):
+        pass
 
 carte = Carte()
 brickman = Brickman()
@@ -484,6 +511,7 @@ interface = Interface()
 etat = Etat()
 limbo = Limbo()
 objet = Objet()
+boss = Boss()
 
 def tictac_carte():
     carte.temps = carte.temps+1
@@ -520,6 +548,10 @@ def tictac_objet():
     objet.affichage()
     Dessin.after(objet.tic,tictac_objet)
 
+def tictac_boss():
+    boss.temps = boss.temps+1
+    boss.affichage()
+    Dessin.after(boss.tic,tictac_boss)
 
 def illumine_moi():
     if not interface.lampe_lumiere_etat:

@@ -22,6 +22,7 @@ tag_kitsoin = "kitsoin"
 tag_transition = "transition"
 tag_boss = "boss"
 tag_ecran_noir = "ecran_noir"
+tag_bombe = "bombe"
 
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
@@ -478,6 +479,8 @@ class Etat():
             self.transition()
         if brickman.vie_etat == False and brickman.deplacement_etat == False:
             self.ecran_noir()
+        if carte.niv_chargeur == 4 and brickman.vie_etat:
+            self.dommage()
     
     def ecran_noir(self):
         affiche_matrice(self.ecran_noir, 0, 0, delta, "black", "black", tag_ecran_noir)
@@ -508,6 +511,19 @@ class Etat():
         elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
             self.transition_etat = False
 
+    def dommage(self):
+        cords_brickman = (brickman.position_X, brickman.position_Y)
+
+        if cords_brickman in boss.cords_boss():
+            brickman.sante -= 1
+        bombe_utilise = []
+        for j in bombe.cords_bombes:
+            if (j[0], j[1]) in boss.cords_boss():
+                bombe_utilise.append(j)
+                boss.sante -= 1
+        for obj in bombe_utilise:
+            bombe.cords_bombes.remove(obj)
+            
 class Objet():
     def __init__(self):
         self.temps = 0
@@ -545,7 +561,7 @@ class Objet():
 
 class Boss():
     def __init__(self):
-        self.tic = 10
+        self.tic = 1000
         self.temps = 10
         self.position_X = 10
         self.position_Y = 10
@@ -559,24 +575,56 @@ class Boss():
         Dessin.delete(tag_boss)
         if carte.niv_chargeur == 4 and brickman.vie_etat:
             self.creer_boss()
-            self.dommage()
+            self.deplacement()
 
     def creer_boss(self):
         for cords in self.cords_boss():
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
-
-
-    def dommage(self):
-        cords_brickman = (brickman.position_X, brickman.position_Y)
-        if cords_brickman in self.cords_boss():
-            brickman.sante -= 1
     
+    def deplacement(self):
+        if self.position_Y == 10:
+            self.sens_etat = True
+
+        if self.position_Y == 20:
+            self.sens_etat = False
+
+        if self.sens_etat == True:
+            self.position_Y += 1
+
+        if self.sens_etat == False:
+            self.position_Y -= 1
+
     def cords_boss(self):
-        cords = []
-        for i in range(6):
-            for j in range(6):
-                cords.append((self.position_X+i, self.position_Y+j))
+        cords = [((self.position_X+i, self.position_Y+j)) for i in range(6) for j in range(6)]
         return cords
+
+class Bombe():
+    def __init__(self):
+        self.temps = 0
+        self.tic = 10
+        self.cords_bombes = set()
+        self.affichage()
+    
+    def affichage(self):
+        if carte.niv_chargeur == 4 and brickman.vie_etat: 
+            Dessin.delete(tag_bombe)
+            self.creer_bombes()
+            self.bombe_destructeur()
+    
+    def creer_bombes(self):
+        for cords in self.cords_bombes:
+            carre(cord_transformer(cords[0], cords[1], delta), "grey", "black", tag_bombe)
+
+    def ajouter_bombe(self, event):
+        if carte.niv_chargeur == 4 and brickman.vie_etat: 
+            self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
+
+    def bombe_destructeur(self):
+        bombes_expirees = [bomb for bomb in self.cords_bombes if self.temps - bomb[2] > 200]
+        for bomb in bombes_expirees:
+            self.cords_bombes.remove(bomb)
+        bombes_expirees = []
+
 
 carte = Carte()
 brickman = Brickman()
@@ -586,6 +634,7 @@ etat = Etat()
 limbo = Limbo()
 objet = Objet()
 boss = Boss()
+bombe = Bombe()
 
 def tictac_carte():
     carte.temps = carte.temps+1
@@ -627,6 +676,12 @@ def tictac_boss():
     boss.affichage()
     Dessin.after(boss.tic,tictac_boss)
 
+def tictac_bombe():
+    bombe.temps = bombe.temps+1
+    bombe.affichage()
+    Dessin.after(bombe.tic,tictac_bombe)
+
+
 def illumine_moi():
     if not interface.lampe_lumiere_etat:
         interface.lampe_lumiere_etat = True
@@ -654,6 +709,7 @@ def assombris_moi():
         bouton_lumiere_2.destroy()
         carte.niv_chargeur = 0
 
+
 def fermer():
     root.destroy()
 
@@ -669,10 +725,12 @@ root.bind('<Up>', brickman.deplacer_haut)
 root.bind('<Down>', brickman.deplacer_bas)
 root.bind('<Left>', brickman.deplacer_gauche)
 root.bind('<Right>', brickman.deplacer_droite)
+root.bind('<space>', bombe.ajouter_bombe)
 
 tictac_carte()
 tictac_objet()
 tictac_brickman()
+tictac_bombe()
 tictac_boss()
 tictac_adversaire()
 tictac_interface()

@@ -574,8 +574,8 @@ class Boss():
     def affichage(self):
         Dessin.delete(tag_boss)
         if carte.niv_chargeur == 4 and brickman.vie_etat:
-            self.creer_boss()
             self.deplacement()
+            self.creer_boss()
 
     def creer_boss(self):
         for cords in self.cords_boss():
@@ -613,7 +613,7 @@ class Bombe():
     
     def creer_bombes(self):
         for cords in self.cords_bombes:
-            carre(cord_transformer(cords[0], cords[1], delta), "grey", "black", tag_bombe)
+            carre(cord_transformer(cords[0], cords[1], delta), "grey", "white", tag_bombe)
 
     def ajouter_bombe(self, event):
         if carte.niv_chargeur == 4 and brickman.vie_etat: 

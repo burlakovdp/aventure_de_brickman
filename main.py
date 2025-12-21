@@ -16,12 +16,12 @@ tag_interface = "interface"
 tag_mure = "mure"
 tag_brickman = "brickman"
 tag_adversaire = "adversaire"
-tag_gagner = "gagner"
 tag_limbo = "limbo"
 tag_tuto = "tuto"
 tag_kitsoin = "kitsoin"
 tag_transition = "transition"
 tag_boss = "boss"
+tag_ecran_noir = "ecran_noir"
 
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
@@ -209,6 +209,15 @@ class Limbo():
                 brickman.vie_etat = True
                 brickman.sante = 100
                 objet.kitsoin_etat = False
+                if carte.niv_chargeur == 1:
+                    brickman.position_X = 0
+                    brickman.position_Y = 1
+                if carte.niv_chargeur == 2:
+                    brickman.position_X = 0
+                    brickman.position_Y = 1
+                if carte.niv_chargeur == 3:
+                    brickman.position_X = 0
+                    brickman.position_Y = 1
                 if carte.niv_chargeur == 4:
                     brickman.position_X = 30
                     brickman.position_Y = 30
@@ -404,11 +413,10 @@ class Brickman():
     def mort(self):
         if self.sante <= 0:
             Dessin.delete(tag_mure)
+            Dessin.delete(tag_transition)
+            Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_interface)
             Dessin.delete(tag_adversaire)
-            Dessin.delete(tag_gagner)
-            Dessin.delete(tag_kitsoin)
-            Dessin.delete(tag_transition)
             Dessin.delete(tag_boss)
             carte.tic = 10
             self.vie_etat = False
@@ -456,19 +464,21 @@ class Etat():
     def __init__(self):
         self.temps = 0
         self.tic = 1
-        self.gagner_X = 3  #49
-        self.gagner_Y = 2  #37
         self.transition_X = 3
-        self.transition_Y = 1
+        self.transition_Y = 5
         self.transition_etat = False
         self.affichage()
         
     def affichage(self):
-        Dessin.delete(tag_gagner)
         Dessin.delete(tag_transition)
         if carte.niv_chargeur > 0 and carte.niv_chargeur < 4 and brickman.vie_etat:
             self.transition()
+        if brickman.vie_etat == False and brickman.deplacement_etat == False:
+            self.ecran_noir()
     
+    def ecran_noir(self):
+        affiche_matrice("./interface/limbo/ecran_noir.pbm", 0, 0, delta, "black", "black", tag_ecran_noir)
+
     def transition(self):
         carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
         if self.transition_X == brickman.position_X and self.transition_Y == brickman.position_Y and self.transition_etat == False:
@@ -479,11 +489,14 @@ class Etat():
             Dessin.delete(tag_brickman)
             print(f'niveau = {carte.niv_chargeur}')
             if carte.niv_chargeur == 1:
-                pass
+                brickman.position_X = 0
+                brickman.position_Y = 1
             elif carte.niv_chargeur == 2:
-                pass
+                brickman.position_X = 0
+                brickman.position_Y = 1
             elif carte.niv_chargeur == 3:
-                pass
+                brickman.position_X = 0
+                brickman.position_Y = 1
             elif carte.niv_chargeur == 4:
                 brickman.position_X = 2
                 brickman.position_Y = 20
@@ -491,12 +504,6 @@ class Etat():
             self.transition_etat = True
         elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
             self.transition_etat = False
-
-    def gagner(self):
-        carre(cord_transformer(self.gagner_X, self.gagner_Y, delta), "green", "black", tag_gagner)
-        if self.gagner_X == brickman.position_X and self.gagner_Y == brickman.position_Y:
-            pass
-            #print("YOU WIN!")
 
 class Objet():
     def __init__(self):
@@ -510,13 +517,15 @@ class Objet():
     def affichage(self):
         Dessin.delete(tag_kitsoin)
         if carte.niv_chargeur > 0 and brickman.vie_etat:
-            self.kitsoin_utilisation()
-            self.position_chargeur()
-            self.creer_kitsoin()
+            #self.kitsoin_utilisation()
+            #self.position_chargeur()
+            #self.creer_kitsoin()
+            pass
 
     def creer_kitsoin(self):
         for position in self.kitsoin_positions:
-            carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
+            pass
+            #carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
         if self.kitsoin_etat == False:

@@ -246,19 +246,11 @@ class Limbo():
                 brickman.vie_etat = True
                 brickman.sante = BRICKMAN_SANTE
                 objet.kitsoin_etat = False
-                if carte.niveau_actuel == 1:
-                    brickman.position_X = 0
-                    brickman.position_Y = 1
-                if carte.niveau_actuel == 2:
-                    brickman.position_X = 0
-                    brickman.position_Y = 1
-                if carte.niveau_actuel == 3:
-                    brickman.position_X = 0
-                    brickman.position_Y = 1
-                if carte.niveau_actuel == 4:
-                    boss.sante = BOSS_SANTE
-                    brickman.position_X = 30
-                    brickman.position_Y = 30
+                if carte.niveau_actuel > 0:
+                    brickman.position_X = etat.niveau_donnees_dict['brickman_pos_X']
+                    brickman.position_Y = etat.niveau_donnees_dict['brickman_pos_Y']
+                    if carte.niveau_actuel == 4:
+                        boss.sante = BOSS_SANTE
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()
                 etat.affichage()           
@@ -273,7 +265,10 @@ class Carte():
         self.niveau_1 = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
         self.niveau_2 = pnm.pbm_vers_matrice("./cartes/niveau_2.pbm")
         self.niveau_3 = pnm.pbm_vers_matrice("./cartes/niveau_3.pbm")
-        self.niveau_1_donnees = open("./donnees/niveau_1.txt", "r", encoding="utf-8")
+        self.niveau_1_donnees = "./donnees/niveau_1.txt"
+        self.niveau_2_donnees = "./donnees/niveau_2.txt"
+        self.niveau_3_donnees = "./donnees/niveau_3.txt"
+        self.niveau_4_donnees = "./donnees/niveau_4.txt"
         self.niveau_boss = pnm.pbm_vers_matrice("./cartes/boss_carte.pbm")
         self.tuto = pnm.pbm_vers_matrice("./interface/tuto/tuto.pbm")
         self.bouger = pnm.pbm_vers_matrice("./interface/tuto/bouger.pbm")
@@ -289,18 +284,18 @@ class Carte():
         if self.niveau_actuel == 0 and brickman.vie_etat == True:
             self.tutoriel()
             self.sortie_tuto()
-        if self.niveau_actuel > 0 and brickman.vie_etat == True:
+        elif self.niveau_actuel > 0 and brickman.vie_etat == True:
             self.tic = 1000
             self.labyrinthe()
 
     def labyrinthe(self):
         if self.niveau_actuel == 1:
             affiche_matrice(self.niveau_1, 0, 0, delta, "white", "black", tag_mure)
-        if self.niveau_actuel == 2:
+        elif self.niveau_actuel == 2:
             affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mure)
-        if self.niveau_actuel == 3:
+        elif self.niveau_actuel == 3:
             affiche_matrice(self.niveau_3, 0, 0, delta, "white", "black", tag_mure)
-        if self.niveau_actuel == 4:
+        elif self.niveau_actuel == 4:
             affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
     
     def tutoriel(self):            
@@ -332,8 +327,6 @@ class Carte():
     def sortie_tuto(self):
         if brickman.position_X == 10 and brickman.position_Y == 20:
             Dessin.delete(tag_tuto)
-            brickman.position_X = 0
-            brickman.position_Y = 1
             carte.niveau_actuel = 1
             adversaire.affichage()
             etat.affichage()  
@@ -506,20 +499,23 @@ class Etat():
     def __init__(self):
         self.temps = 0
         self.tic = 1
-        self.transition_X = 3
-        self.transition_Y = 5
+        self.transition_X = None
+        self.transition_Y = None
         self.transition_etat = False
+        self.niv_charge_etat = False
+        self.niveau_donnees_dict = None
         self.ecran_noir = "./interface/limbo/ecran_noir.pbm"
         self.affichage()
         
     def affichage(self):
         Dessin.delete(tag_transition)
-        if carte.niveau_actuel > 0 and carte.niveau_actuel < 4 and brickman.vie_etat:
+        if carte.niveau_actuel > 0 and brickman.vie_etat:
+            self.niveau_chargeur()
             self.transition()
         if brickman.vie_etat == False and brickman.deplacement_etat == False:
             self.ecran_noir()
         if carte.niveau_actuel == 4 and brickman.vie_etat:
-            self.dommage()
+            self.dommage_boss()
     
     def ecran_noir(self):
         affiche_matrice(self.ecran_noir, 0, 0, delta, "black", "black", tag_ecran_noir)
@@ -527,30 +523,23 @@ class Etat():
     def transition(self):
         carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
         if self.transition_X == brickman.position_X and self.transition_Y == brickman.position_Y and self.transition_etat == False:
-            carte.niveau_actuel += 1
+            if carte.niveau_actuel < 4:
+                carte.niveau_actuel += 1
+            self.niv_charge_etat = False
             Dessin.delete(tag_mure)
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_brickman)
             print(f'niveau = {carte.niveau_actuel}')
-            if carte.niveau_actuel == 1:
-                brickman.position_X = 0
-                brickman.position_Y = 1
-            elif carte.niveau_actuel == 2:
-                brickman.position_X = 0
-                brickman.position_Y = 1
-            elif carte.niveau_actuel == 3:
-                brickman.position_X = 0
-                brickman.position_Y = 1
-            elif carte.niveau_actuel == 4:
-                brickman.position_X = 2
-                brickman.position_Y = 20
+            self.affichage()
             carte.affichage()
+            if carte.niveau_actuel == 4:
+                boss.affichage()
             self.transition_etat = True
         elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
             self.transition_etat = False
 
-    def dommage(self):
+    def dommage_boss(self):
         cords_brickman = (brickman.position_X, brickman.position_Y)
 
         if cords_brickman in boss.cords_boss():
@@ -564,21 +553,39 @@ class Etat():
 
         for piece in bombe_utilise:
             bombe.cords_bombes.remove(piece)
-            
+
+    def niveau_chargeur(self):
+        if not self.niv_charge_etat:
+            if carte.niveau_actuel == 1:
+                self.niveau_donnees_dict = parseur(carte.niveau_1_donnees)
+            elif carte.niveau_actuel == 2:
+                self.niveau_donnees_dict = parseur(carte.niveau_2_donnees)
+            elif carte.niveau_actuel == 3:
+                self.niveau_donnees_dict = parseur(carte.niveau_3_donnees)
+            elif carte.niveau_actuel == 4:
+                self.niveau_donnees_dict = parseur(carte.niveau_4_donnees) 
+            brickman.position_X = self.niveau_donnees_dict['brickman_pos_X']
+            brickman.position_Y = self.niveau_donnees_dict['brickman_pos_Y']
+            self.transition_X = self.niveau_donnees_dict['transition_pos_X']
+            self.transition_Y = self.niveau_donnees_dict['transition_pos_Y']
+            objet.position_chargeur()
+            self.transition()
+            print(self.niveau_donnees_dict)
+            self.niv_charge_etat = True
+
 class Objet():
     def __init__(self):
         self.temps = 0
         self.tic = 10
         self.kitsoin_bonus = 10 
         self.kitsoin_positions = set()
-        self.kitsoin_etat = True
+        self.kitsoin_etat = False
         self.affichage()
     
     def affichage(self):
         Dessin.delete(tag_kitsoin)
         if carte.niveau_actuel > 0 and brickman.vie_etat:
             self.kitsoin_utilisation()
-            self.position_chargeur()
             self.creer_kitsoin()
 
     def creer_kitsoin(self):
@@ -586,9 +593,10 @@ class Objet():
             carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
-        if self.kitsoin_etat == False:
-             self.kitsoin_positions = {(0, 0)}
-             self.kitsoin_etat = True
+        self.kitsoin_positions.clear()
+        for cords in etat.niveau_donnees_dict['kitsoin_position']:
+            self.kitsoin_positions.add(cords)
+
     
     def kitsoin_utilisation(self):
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:

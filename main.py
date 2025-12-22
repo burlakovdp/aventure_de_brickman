@@ -242,15 +242,14 @@ class Limbo():
     def reveil(self):
         if brickman.position_X == self.sortie_X and brickman.position_Y == self.sortie_Y:
                 self.sortie_etat = False
+                etat.niv_charge_etat = False
                 brickman.deplacement_etat = False
                 brickman.vie_etat = True
                 brickman.sante = BRICKMAN_SANTE
-                objet.kitsoin_etat = False
-                if carte.niveau_actuel > 0:
-                    brickman.position_X = etat.niveau_donnees_dict['brickman_pos_X']
-                    brickman.position_Y = etat.niveau_donnees_dict['brickman_pos_Y']
-                    if carte.niveau_actuel == 4:
+                if carte.niveau_actuel == 4:
+                        objet.kitsoin_positions.clear()
                         boss.sante = BOSS_SANTE
+                        boss.affichage()
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()
                 etat.affichage()           
@@ -521,7 +520,8 @@ class Etat():
         affiche_matrice(self.ecran_noir, 0, 0, delta, "black", "black", tag_ecran_noir)
 
     def transition(self):
-        carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
+        if carte.niveau_actuel < 4 and carte.niveau_actuel > 0 and brickman.vie_etat:
+            carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
         if self.transition_X == brickman.position_X and self.transition_Y == brickman.position_Y and self.transition_etat == False:
             if carte.niveau_actuel < 4:
                 carte.niveau_actuel += 1
@@ -563,6 +563,7 @@ class Etat():
             elif carte.niveau_actuel == 3:
                 self.niveau_donnees_dict = parseur(carte.niveau_3_donnees)
             elif carte.niveau_actuel == 4:
+                objet.kitsoin_positions.clear()
                 self.niveau_donnees_dict = parseur(carte.niveau_4_donnees) 
             brickman.position_X = self.niveau_donnees_dict['brickman_pos_X']
             brickman.position_Y = self.niveau_donnees_dict['brickman_pos_Y']
@@ -576,10 +577,12 @@ class Etat():
 class Objet():
     def __init__(self):
         self.temps = 0
+        self.temps_dernier_creation = None
         self.tic = 10
         self.kitsoin_bonus = 10 
         self.kitsoin_positions = set()
         self.kitsoin_etat = False
+        self.kitsoin_counter = 0
         self.affichage()
     
     def affichage(self):
@@ -587,16 +590,28 @@ class Objet():
         if carte.niveau_actuel > 0 and brickman.vie_etat:
             self.kitsoin_utilisation()
             self.creer_kitsoin()
+        if carte.niveau_actuel == 4:
+            self.position_chargeur()
 
     def creer_kitsoin(self):
         for position in self.kitsoin_positions:
             carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
-        self.kitsoin_positions.clear()
-        for cords in etat.niveau_donnees_dict['kitsoin_position']:
-            self.kitsoin_positions.add(cords)
-
+        if carte.niveau_actuel == 4:
+            if self.temps_dernier_creation == None:
+                self.kitsoin_positions.clear()
+                self.kitsoin_positions.add((random.randint(1, 47), 10))
+                self.kitsoin_counter += 1
+                self.temps_dernier_creation = self.temps
+            elif self.temps - self.temps_dernier_creation > 200 and self.kitsoin_counter < 4:
+                self.kitsoin_positions.add((random.randint(1, 47), 10))
+                self.temps_dernier_creation = self.temps
+                self.kitsoin_counter += 1
+        else:
+            self.kitsoin_positions.clear()
+            for cords in etat.niveau_donnees_dict['kitsoin_position']:
+                self.kitsoin_positions.add(cords)
     
     def kitsoin_utilisation(self):
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:
@@ -605,6 +620,9 @@ class Objet():
             else:
                 self.kitsoin_positions.remove((brickman.position_X, brickman.position_Y))
                 brickman.sante += self.kitsoin_bonus
+                if carte.niveau_actuel == 4:
+                    print(self.kitsoin_counter)
+                    self.kitsoin_counter -= 1
 
 class Boss():
     def __init__(self):

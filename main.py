@@ -415,6 +415,7 @@ class Brickman():
         if self.sante <= 0:
             if not self.deplacement_etat: 
                 Dessin.delete(tag_brickman)
+            Dessin.delete(tag_bombe)
             Dessin.delete(tag_mure)
             Dessin.delete(tag_transition)
             Dessin.delete(tag_kitsoin)
@@ -516,13 +517,15 @@ class Etat():
 
         if cords_brickman in boss.cords_boss():
             brickman.sante -= 1
+
         bombe_utilise = []
-        for j in bombe.cords_bombes:
-            if (j[0], j[1]) in boss.cords_boss():
-                bombe_utilise.append(j)
+        for cord in bombe.cords_bombes:
+            if (cord[0], cord[1]) in boss.cords_boss():
+                bombe_utilise.append(cord)
                 boss.sante -= 1
-        for obj in bombe_utilise:
-            bombe.cords_bombes.remove(obj)
+
+        for piece in bombe_utilise:
+            bombe.cords_bombes.remove(piece)
             
 class Objet():
     def __init__(self):
@@ -536,15 +539,15 @@ class Objet():
     def affichage(self):
         Dessin.delete(tag_kitsoin)
         if carte.niv_chargeur > 0 and brickman.vie_etat:
-            #self.kitsoin_utilisation()
-            #self.position_chargeur()
-            #self.creer_kitsoin()
+            self.kitsoin_utilisation()
+            self.position_chargeur()
+            self.creer_kitsoin()
             pass
 
     def creer_kitsoin(self):
         for position in self.kitsoin_positions:
             pass
-            #carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
+            carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
         if self.kitsoin_etat == False:

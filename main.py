@@ -251,6 +251,9 @@ class Limbo():
                         objet.kitsoin_counter = 0
                         objet.temps_dernier_creation == None
                         boss.sante = BOSS_SANTE
+                        boss.etat_combat = False
+                        boss.position_X = random.randint(1, 42)
+                        boss.position_Y = 5
                         boss.affichage()
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()
@@ -532,9 +535,10 @@ class Etat():
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_brickman)
-            print(f'niveau = {carte.niveau_actuel}')
+            #(f'niveau = {carte.niveau_actuel}')
             self.affichage()
             carte.affichage()
+            adversaire.affichage()
             if carte.niveau_actuel == 4:
                 boss.affichage()
             self.transition_etat = True
@@ -573,7 +577,7 @@ class Etat():
             self.transition_Y = self.niveau_donnees_dict['transition_pos_Y']
             objet.position_chargeur()
             self.transition()
-            print(self.niveau_donnees_dict)
+            #print(self.niveau_donnees_dict)
             self.niv_charge_etat = True
 
 class Objet():
@@ -603,11 +607,11 @@ class Objet():
         if carte.niveau_actuel == 4:
             if self.temps_dernier_creation == None:
                 self.kitsoin_positions.clear()
-                self.kitsoin_positions.add((random.randint(1, 47), 10))
+                self.kitsoin_positions.add((random.randint(1, 47), 37))
                 self.kitsoin_counter += 1
                 self.temps_dernier_creation = self.temps
             elif self.temps - self.temps_dernier_creation > 200 and self.kitsoin_counter < 4:
-                self.kitsoin_positions.add((random.randint(1, 47), 10))
+                self.kitsoin_positions.add((random.randint(1, 47), 37))
                 self.temps_dernier_creation = self.temps
                 self.kitsoin_counter += 1
             elif self.kitsoin_counter == 4:
@@ -618,8 +622,14 @@ class Objet():
                 self.kitsoin_positions.add(cords)
     
     def kitsoin_utilisation(self):
+        if brickman.vie_etat and carte.niveau_actuel == 4:
+            for cords in boss.cords_boss():
+                if cords in self.kitsoin_positions:
+                    self.kitsoin_positions.remove((cords[0], cords[1]))
+                    self.kitsoin_counter -= 1
+
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:
-            print(f'brickman sante avant -> {brickman.sante}')
+            #print(f'brickman sante avant -> {brickman.sante}')
             if brickman.sante == 100:
                 return
             else:
@@ -628,54 +638,89 @@ class Objet():
                     brickman.sante = 100
                 else:
                     brickman.sante += self.kitsoin_bonus
-                print(f'brickman sante apres -> {brickman.sante}')
+                #print(f'brickman sante apres -> {brickman.sante}')
                 if carte.niveau_actuel == 4:
                     print(self.kitsoin_counter)
                     self.kitsoin_counter -= 1
 
 class Boss():
     def __init__(self):
-        self.tic = 1000
-        self.temps = 10
-        self.position_X = 10
-        self.position_Y = 10
+        self.tic = 50
+        self.temps = 0
+        self.position_X = 20
+        self.position_Y = 5
+        self.initial_Y = 5
         self.dommage = 1
         self.sante = BOSS_SANTE
+        self.etat_combat = False
+        self.etat_deplacement = False
+        self.etat_deplacement_X = False
+        self.etat_deplacement_Y = False
+        self.deplacement_cords = None
+        self.descente_etat = False
+        self.montee_etat = False
+        self.temps_deplacement_X = None
         self.affichage()
 
     def affichage(self):
         Dessin.delete(tag_boss)
         if carte.niveau_actuel == 4 and brickman.vie_etat:
-            self.deplacement()
+            self.boss_controle()
             self.creer_boss()
 
     def creer_boss(self):
         for cords in self.cords_boss():
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
     
-    def deplacement(self):
-        if self.position_Y == 10:
-            self.sens_etat = True
-
-        if self.position_Y == 20:
-            self.sens_etat = False
-
-        if self.sens_etat == True:
-            self.position_Y += 1
-
-        if self.sens_etat == False:
-            self.position_Y -= 1
+    def boss_controle(self):
+        if self.temps > 200 and not self.etat_combat:
+            self.etat_combat = True
+        elif self.etat_combat and self.etat_deplacement == False:
+            self.cords = self.choix_deplacement()
+            self.etat_deplacement = True
+        elif self.etat_combat and self.etat_deplacement:
+            self.deplacement(self.cords)
 
     def cords_boss(self):
         cords = [((self.position_X+i, self.position_Y+j)) for i in range(6) for j in range(6)] #6 - boss longueur and hauteur (cube)
         return cords
 
+    def choix_deplacement(self):
+        return ((random.randint(1, 42), 32))
+
+    def deplacement(self, cords):
+        if self.etat_deplacement_X and self.etat_deplacement_Y:
+            self.etat_deplacement = False
+            self.etat_deplacement_X = False
+            self.etat_deplacement_Y = False
+        elif self.etat_deplacement_X == False and self.etat_deplacement_Y == False:
+            if self.position_X < cords[0]:
+                self.position_X += 1
+            elif self.position_X > cords[0]:
+                self.position_X -= 1
+            elif self.position_X == cords[0]:
+                self.etat_deplacement_X = True
+                self.temps_deplacement_X = self.temps
+        elif self.etat_deplacement_Y == False and self.etat_deplacement_X and self.temps - self.temps_deplacement_X > 10:
+            if self.position_Y == self.initial_Y and self.montee_etat and self.descente_etat:
+                self.etat_deplacement_Y = True
+                self.descente_etat = False
+                self.montee_etat = False
+            elif self.descente_etat == True and self.montee_etat == False and self.position_Y > self.initial_Y:
+                self.position_Y -= 1
+            elif self.descente_etat == True and self.montee_etat == False and self.position_Y == self.initial_Y:
+                self.montee_etat = True
+            elif self.descente_etat == False and self.position_Y < cords[1]:
+                self.position_Y += 1
+            elif self.position_Y == cords[1]:
+                self.descente_etat = True
+        
 class Bombe():
     def __init__(self):
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 10
+        self.dommage = 5
         self.affichage()
     
     def affichage(self):

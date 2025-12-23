@@ -1,5 +1,5 @@
 brickman_pos_X:5
-brickman_pos_Y:5
+brickman_pos_Y:30
 transition_pos_X:1
 transition_pos_Y:1
 kitsoin_position:0,0

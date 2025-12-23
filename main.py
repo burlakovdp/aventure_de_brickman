@@ -248,6 +248,8 @@ class Limbo():
                 brickman.sante = BRICKMAN_SANTE
                 if carte.niveau_actuel == 4:
                         objet.kitsoin_positions.clear()
+                        objet.kitsoin_counter = 0
+                        objet.temps_dernier_creation == None
                         boss.sante = BOSS_SANTE
                         boss.affichage()
                 Dessin.delete(tag_limbo)

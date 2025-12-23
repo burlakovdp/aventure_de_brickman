@@ -26,6 +26,7 @@ tag_bombe = "bombe"
 
 BOSS_SANTE = 200
 BRICKMAN_SANTE = 100
+BRICKMAN_COULEUR = "yellow"
 
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
@@ -344,6 +345,7 @@ class Brickman():
         self.sante = BRICKMAN_SANTE
         self.vie_etat = True
         self.deplacement_etat = False
+        self.couleur = BRICKMAN_COULEUR
         self.affichage()
     
     def affichage(self):
@@ -356,7 +358,7 @@ class Brickman():
             self.mort()
 
     def creer_brickman(self, x, y):
-        carre(cord_transformer(x, y, delta), "yellow", "black", tag_brickman)
+        carre(cord_transformer(x, y, delta), self.couleur, "black", tag_brickman)
 
     def deplacer_haut(self, event):
         if brickman.vie_etat and carte.niveau_actuel == 4:
@@ -727,6 +729,7 @@ class Bombe():
         self.tic = 10
         self.cords_bombes = set()
         self.dommage = 2
+        self.temps_dernier_creation = None
         self.affichage()
     
     def affichage(self):
@@ -734,14 +737,25 @@ class Bombe():
             Dessin.delete(tag_bombe)
             self.creer_bombes()
             self.bombe_destructeur()
+            self.changeur_couleur()
     
     def creer_bombes(self):
         for cords in self.cords_bombes:
             carre(cord_transformer(cords[0], cords[1], delta), "grey", "white", tag_bombe)
 
     def ajouter_bombe(self, event):
-        if carte.niveau_actuel == 4 and brickman.vie_etat: 
+        if self.temps_dernier_creation == None and carte.niveau_actuel == 4 and brickman.vie_etat:
             self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
+            self.temps_dernier_creation = self.temps
+            brickman.couleur = "blue"
+        if carte.niveau_actuel == 4 and brickman.vie_etat and self.temps - self.temps_dernier_creation > 50: 
+            self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
+            self.temps_dernier_creation = self.temps
+            brickman.couleur = "blue"
+
+    def changeur_couleur(self):
+        if carte.niveau_actuel == 4 and brickman.vie_etat and self.temps_dernier_creation != None and self.temps - self.temps_dernier_creation > 50:
+            brickman.couleur = BRICKMAN_COULEUR
 
     def bombe_destructeur(self):
         bombes_expirees = [bomb for bomb in self.cords_bombes if self.temps - bomb[2] > 200]

@@ -545,13 +545,13 @@ class Etat():
         cords_brickman = (brickman.position_X, brickman.position_Y)
 
         if cords_brickman in boss.cords_boss():
-            brickman.sante -= 1
+            brickman.sante -= boss.dommage
 
         bombe_utilise = []
         for cord in bombe.cords_bombes:
             if (cord[0], cord[1]) in boss.cords_boss():
                 bombe_utilise.append(cord)
-                boss.sante -= 1
+                boss.sante -= bombe.dommage
 
         for piece in bombe_utilise:
             bombe.cords_bombes.remove(piece)
@@ -610,6 +610,8 @@ class Objet():
                 self.kitsoin_positions.add((random.randint(1, 47), 10))
                 self.temps_dernier_creation = self.temps
                 self.kitsoin_counter += 1
+            elif self.kitsoin_counter == 4:
+                self.temps_dernier_creation = self.temps
         else:
             self.kitsoin_positions.clear()
             for cords in etat.niveau_donnees_dict['kitsoin_position']:
@@ -617,11 +619,16 @@ class Objet():
     
     def kitsoin_utilisation(self):
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:
-            if brickman.sante + self.kitsoin_bonus > 100:
+            print(f'brickman sante avant -> {brickman.sante}')
+            if brickman.sante == 100:
                 return
             else:
                 self.kitsoin_positions.remove((brickman.position_X, brickman.position_Y))
-                brickman.sante += self.kitsoin_bonus
+                if brickman.sante + self.kitsoin_bonus > 100:
+                    brickman.sante = 100
+                else:
+                    brickman.sante += self.kitsoin_bonus
+                print(f'brickman sante apres -> {brickman.sante}')
                 if carte.niveau_actuel == 4:
                     print(self.kitsoin_counter)
                     self.kitsoin_counter -= 1
@@ -632,6 +639,7 @@ class Boss():
         self.temps = 10
         self.position_X = 10
         self.position_Y = 10
+        self.dommage = 1
         self.sante = BOSS_SANTE
         self.affichage()
 
@@ -667,6 +675,7 @@ class Bombe():
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
+        self.dommage = 10
         self.affichage()
     
     def affichage(self):

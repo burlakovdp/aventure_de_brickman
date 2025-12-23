@@ -359,7 +359,9 @@ class Brickman():
         carre(cord_transformer(x, y, delta), "yellow", "black", tag_brickman)
 
     def deplacer_haut(self, event):
-        if brickman.vie_etat and carte.niveau_actuel == 0:
+        if brickman.vie_etat and carte.niveau_actuel == 4:
+            return 
+        elif brickman.vie_etat and carte.niveau_actuel == 0:
             if self.position_Y == 0:
                 return
             elif carte.tuto_collision(self.position_X, self.position_Y-1):
@@ -380,7 +382,9 @@ class Brickman():
             self.position_Y -= 1
 
     def deplacer_bas(self, event):
-        if brickman.vie_etat and carte.niveau_actuel == 0:
+        if brickman.vie_etat and carte.niveau_actuel == 4:
+            return 
+        elif brickman.vie_etat and carte.niveau_actuel == 0:
             if self.position_Y == Hauteur//delta-1:
                 return 
             elif carte.tuto_collision(self.position_X, self.position_Y+1):
@@ -610,7 +614,7 @@ class Objet():
                 self.kitsoin_positions.add((random.randint(1, 47), 37))
                 self.kitsoin_counter += 1
                 self.temps_dernier_creation = self.temps
-            elif self.temps - self.temps_dernier_creation > 200 and self.kitsoin_counter < 4:
+            elif self.temps - self.temps_dernier_creation > 500 and self.kitsoin_counter < 4:
                 self.kitsoin_positions.add((random.randint(1, 47), 37))
                 self.temps_dernier_creation = self.temps
                 self.kitsoin_counter += 1
@@ -701,6 +705,7 @@ class Boss():
             elif self.position_X == cords[0]:
                 self.etat_deplacement_X = True
                 self.temps_deplacement_X = self.temps
+                self.tic = 25
         elif self.etat_deplacement_Y == False and self.etat_deplacement_X and self.temps - self.temps_deplacement_X > 10:
             if self.position_Y == self.initial_Y and self.montee_etat and self.descente_etat:
                 self.etat_deplacement_Y = True
@@ -714,13 +719,14 @@ class Boss():
                 self.position_Y += 1
             elif self.position_Y == cords[1]:
                 self.descente_etat = True
+                self.tic = 50
         
 class Bombe():
     def __init__(self):
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 5
+        self.dommage = 2
         self.affichage()
     
     def affichage(self):

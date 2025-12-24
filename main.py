@@ -28,6 +28,8 @@ BOSS_SANTE = 200
 BRICKMAN_SANTE = 100
 BRICKMAN_COULEUR = "yellow"
 
+final = False
+
 Dessin=tk.Canvas(root,height=Hauteur,width=Largeur,bg=bg_couleur)
 Dessin.pack()
 
@@ -117,6 +119,9 @@ class Interface():
 
     def affichage(self):
         Dessin.delete(tag_interface)
+        if final:
+            Dessin.delete(tag_interface)
+            return 
         if self.lampe_etat:
             self.creer_lampe()
         if self.lampe_lumiere_etat:
@@ -225,7 +230,9 @@ class Limbo():
     
     def affichage(self):
         Dessin.delete(tag_limbo)
-        if brickman.vie_etat == False:
+        if final:
+            Dessin.delete(tag_limbo)
+        elif brickman.vie_etat == False:
             if not self.sortie_etat:
                 self.sortie_X = random.randint(0, 48)
                 self.sortie_Y = random.randint(10, 40)
@@ -286,7 +293,10 @@ class Carte():
     def affichage(self):
         Dessin.delete(tag_tuto)
         Dessin.delete(tag_mure)
-        if self.niveau_actuel == 0 and brickman.vie_etat == True:
+        if final:
+            Dessin.delete(tag_tuto)
+            Dessin.delete(tag_mure)
+        elif self.niveau_actuel == 0 and brickman.vie_etat == True:
             self.tutoriel()
             self.sortie_tuto()
         elif self.niveau_actuel > 0 and brickman.vie_etat == True:
@@ -350,9 +360,12 @@ class Brickman():
     
     def affichage(self):
         Dessin.delete(tag_brickman)
-        if carte.niveau_actuel  == 0:
+        if final:
+            Dessin.delete(tag_brickman)
+            return 
+        elif carte.niveau_actuel  == 0:
             self.creer_brickman(self.position_X, self.position_Y)
-        if carte.niveau_actuel >= 1:
+        elif carte.niveau_actuel >= 1:
             self.creer_brickman(self.position_X, self.position_Y)
             self.dommage()
             self.mort()
@@ -514,11 +527,14 @@ class Etat():
         self.transition_etat = False
         self.niv_charge_etat = False
         self.niveau_donnees_dict = None
-        self.ecran_noir = "./interface/limbo/ecran_noir.pbm"
+        self.ecran_noir_path = "./interface/limbo/ecran_noir.pbm"
         self.affichage()
         
     def affichage(self):
         Dessin.delete(tag_transition)
+        if final:
+            Dessin.delete(tag_transition)
+            return
         if carte.niveau_actuel > 0 and brickman.vie_etat:
             self.niveau_chargeur()
             self.transition()
@@ -526,9 +542,11 @@ class Etat():
             self.ecran_noir()
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
             self.dommage_boss()
+        if carte.niveau_actuel == 4 and brickman.vie_etat and boss.mort_etat == True:
+            self.final_ft()
     
     def ecran_noir(self):
-        affiche_matrice(self.ecran_noir, 0, 0, delta, "black", "black", tag_ecran_noir)
+        affiche_matrice(self.ecran_noir_path, 0, 0, delta, "black", "black", tag_ecran_noir)
 
     def transition(self):
         if carte.niveau_actuel < 4 and carte.niveau_actuel > 0 and brickman.vie_etat:
@@ -592,6 +610,23 @@ class Etat():
             #print(self.niveau_donnees_dict)
             self.niv_charge_etat = True
 
+    def final_ft(self):
+        global final 
+        carre(cord_transformer(5, 37, delta), "pink", "black", tag_transition)
+        if brickman.position_X == 5 and brickman.position_Y == 37:
+            self.ecran_noir()
+            final = True
+            Dessin.delete(tag_adversaire)
+            Dessin.delete(tag_bombe)
+            Dessin.delete(tag_boss)
+            Dessin.delete(tag_brickman)
+            Dessin.delete(tag_mure)
+            Dessin.delete(tag_interface)
+            Dessin.delete(tag_kitsoin)
+            Dessin.delete(tag_transition)
+
+        
+
 class Objet():
     def __init__(self):
         self.temps = 0
@@ -605,6 +640,9 @@ class Objet():
     
     def affichage(self):
         Dessin.delete(tag_kitsoin)
+        if final:
+            Dessin.delete(tag_kitsoin)
+            return 
         if carte.niveau_actuel > 0 and brickman.vie_etat:
             self.kitsoin_utilisation()
             self.creer_kitsoin()
@@ -661,6 +699,7 @@ class Boss():
     def __init__(self):
         self.tic = 50
         self.temps = 0
+        self.mort_etat = False
         self.position_X = 20
         self.position_Y = 5
         self.initial_Y = 5
@@ -679,6 +718,9 @@ class Boss():
 
     def affichage(self):
         Dessin.delete(tag_boss)
+        if final:
+            Dessin.delete(tag_boss)
+            return 
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
             self.boss_controle()
             self.creer_boss()
@@ -740,6 +782,9 @@ class Boss():
                 self.tic = 50
 
     def mort(self):
+        global final 
+        if boss.sante <= 0 and self.mort_cords != None and len(self.mort_cords) == 0:
+            boss.mort_etat = True
         for cords in self.mort_cords:
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss)
         if len(self.mort_cords) != 0:
@@ -755,6 +800,10 @@ class Bombe():
         self.affichage()
     
     def affichage(self):
+        Dessin.delete(tag_bombe)
+        if final:
+            Dessin.delete(tag_bombe)
+            return 
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante <= 0:
             self.cords_bombes.clear()
             Dessin.delete(tag_bombe)
@@ -814,6 +863,11 @@ def tictac_interface():
     interface.affichage()
     Dessin.after(interface.tic,tictac_interface)
 
+def tictac_boss():
+    boss.temps = boss.temps+1
+    boss.affichage()
+    Dessin.after(boss.tic,tictac_boss)
+
 def tictac_etat():
     etat.temps = etat.temps+1
     etat.affichage()
@@ -828,11 +882,6 @@ def tictac_objet():
     objet.temps = objet.temps+1
     objet.affichage()
     Dessin.after(objet.tic,tictac_objet)
-
-def tictac_boss():
-    boss.temps = boss.temps+1
-    boss.affichage()
-    Dessin.after(boss.tic,tictac_boss)
 
 def tictac_bombe():
     bombe.temps = bombe.temps+1

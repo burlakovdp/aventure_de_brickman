@@ -524,7 +524,7 @@ class Etat():
             self.transition()
         if brickman.vie_etat == False and brickman.deplacement_etat == False:
             self.ecran_noir()
-        if carte.niveau_actuel == 4 and brickman.vie_etat:
+        if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
             self.dommage_boss()
     
     def ecran_noir(self):
@@ -560,8 +560,14 @@ class Etat():
         bombe_utilise = []
         for cord in bombe.cords_bombes:
             if (cord[0], cord[1]) in boss.cords_boss():
-                bombe_utilise.append(cord)
-                boss.sante -= bombe.dommage
+                if boss.sante == 0:
+                    pass
+                elif boss.sante - bombe.dommage < 0:
+                    bombe_utilise.append(cord)
+                    boss.sante = 0
+                else:
+                    bombe_utilise.append(cord)
+                    boss.sante -= bombe.dommage
 
         for piece in bombe_utilise:
             bombe.cords_bombes.remove(piece)
@@ -611,7 +617,9 @@ class Objet():
 
     def position_chargeur(self):
         if carte.niveau_actuel == 4:
-            if self.temps_dernier_creation == None:
+            if boss.sante <= 0:
+                self.kitsoin_positions.clear()
+            elif self.temps_dernier_creation == None:
                 self.kitsoin_positions.clear()
                 self.kitsoin_positions.add((random.randint(1, 47), 37))
                 self.kitsoin_counter += 1
@@ -666,13 +674,21 @@ class Boss():
         self.descente_etat = False
         self.montee_etat = False
         self.temps_deplacement_X = None
+        self.mort_cords = None
         self.affichage()
 
     def affichage(self):
         Dessin.delete(tag_boss)
-        if carte.niveau_actuel == 4 and brickman.vie_etat:
+        if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
             self.boss_controle()
             self.creer_boss()
+        elif carte.niveau_actuel == 4 and brickman.vie_etat and self.sante <= 0:
+            if self.mort_cords == None:
+                self.tic = 100
+                self.mort_cords = set()
+                for cords in self.cords_boss():
+                    self.mort_cords.add(cords)
+            self.mort()
 
     def creer_boss(self):
         for cords in self.cords_boss():
@@ -722,18 +738,27 @@ class Boss():
             elif self.position_Y == cords[1]:
                 self.descente_etat = True
                 self.tic = 50
-        
+
+    def mort(self):
+        for cords in self.mort_cords:
+            carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss)
+        if len(self.mort_cords) != 0:
+            self.mort_cords.pop()
+
 class Bombe():
     def __init__(self):
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 2
+        self.dommage = 50
         self.temps_dernier_creation = None
         self.affichage()
     
     def affichage(self):
-        if carte.niveau_actuel == 4 and brickman.vie_etat: 
+        if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante <= 0:
+            self.cords_bombes.clear()
+            Dessin.delete(tag_bombe)
+        elif carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0: 
             Dessin.delete(tag_bombe)
             self.creer_bombes()
             self.bombe_destructeur()
@@ -744,15 +769,9 @@ class Bombe():
             carre(cord_transformer(cords[0], cords[1], delta), "grey", "white", tag_bombe)
 
     def ajouter_bombe(self, event):
-        if self.temps_dernier_creation == None and carte.niveau_actuel == 4 and brickman.vie_etat:
+        if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
             self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
-            self.temps_dernier_creation = self.temps
-            brickman.couleur = "blue"
-        if carte.niveau_actuel == 4 and brickman.vie_etat and self.temps - self.temps_dernier_creation > 50: 
-            self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
-            self.temps_dernier_creation = self.temps
-            brickman.couleur = "blue"
-
+            
     def changeur_couleur(self):
         if carte.niveau_actuel == 4 and brickman.vie_etat and self.temps_dernier_creation != None and self.temps - self.temps_dernier_creation > 50:
             brickman.couleur = BRICKMAN_COULEUR

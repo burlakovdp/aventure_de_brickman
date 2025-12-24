@@ -564,6 +564,7 @@ class Etat():
             carte.affichage()
             adversaire.affichage()
             if carte.niveau_actuel == 4:
+                boss.boss_start = boss.temps
                 boss.affichage()
             self.transition_etat = True
         elif self.transition_X != brickman.position_X or self.transition_Y != brickman.position_Y:
@@ -714,6 +715,7 @@ class Boss():
         self.montee_etat = False
         self.temps_deplacement_X = None
         self.mort_cords = None
+        self.boss_start = None
         self.affichage()
 
     def affichage(self):
@@ -737,7 +739,7 @@ class Boss():
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
     
     def boss_controle(self):
-        if self.temps > 200 and not self.etat_combat:
+        if self.temps - self.boss_start > 100 and not self.etat_combat:
             self.etat_combat = True
         elif self.etat_combat and self.etat_deplacement == False:
             self.cords = self.choix_deplacement()

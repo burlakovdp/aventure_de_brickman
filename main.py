@@ -285,6 +285,12 @@ class Carte():
         self.tuto = pnm.pbm_vers_matrice("./interface/tuto/tuto.pbm")
         self.bouger = pnm.pbm_vers_matrice("./interface/tuto/bouger.pbm")
         self.sante = pnm.pbm_vers_matrice("./interface/tuto/sante.pbm")
+        self.sortie = pnm.pbm_vers_matrice("./interface/tuto/sortie.pbm")
+        self.soin = pnm.pbm_vers_matrice("./interface/tuto/soin.pbm")
+        self.sortie_position_X = 25
+        self.sortie_position_Y = 17
+        self.kitsoin_position_X = 10
+        self.kitsoin_position_Y = 17
         self.temps = 0
         self.tic = 10
         self.niveau_actuel = -1
@@ -314,11 +320,14 @@ class Carte():
             affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
     
     def tutoriel(self):            
-        carre(cord_transformer(10,20, delta), "pink", "black", tag_tuto)
+        carre(cord_transformer(self.sortie_position_X, self.sortie_position_Y, delta), "pink", "black", tag_tuto)
+        carre(cord_transformer(self.kitsoin_position_X, self.kitsoin_position_Y, delta,), "green", "black", tag_tuto)
         affiche_matrice(self.tuto, 0, 0, delta, "white", "black", tag_tuto)
-        affiche_matrice(self.bouger, 66, 60, delta_min, "white", "black", tag_tuto)
+        affiche_matrice(self.bouger, 65, 60, delta_min, "white", "black", tag_tuto)
         affiche_matrice(self.sante, 8, 58, delta_min, "white", "black", tag_tuto)
-        
+        affiche_matrice(self.soin, 7, 18, delta_min, "white", "black", tag_tuto)
+        affiche_matrice(self.sortie, 51, 18, delta_min, "white", "black", tag_tuto)
+
     def tuto_collision(self, x, y):
         if self.tuto[y][x] == 1:
             return True
@@ -340,7 +349,7 @@ class Carte():
         return False
 
     def sortie_tuto(self):
-        if brickman.position_X == 10 and brickman.position_Y == 20:
+        if brickman.position_X == self.sortie_position_X and brickman.position_Y == self.sortie_position_Y:
             Dessin.delete(tag_tuto)
             carte.niveau_actuel = 1
             adversaire.affichage()

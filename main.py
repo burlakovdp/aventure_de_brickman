@@ -172,7 +172,7 @@ class Interface():
         affiche_matrice_rgb(self.titre, 2, 15, delta, "black", tag_interface)
 
     def creer_logo(self):
-        affiche_matrice_rgb(self.logo, 60, 60, delta_min, "black", tag_interface)
+        affiche_matrice_rgb(self.logo, 60, 62, delta_min, "black", tag_interface)
 
     def creer_projet(self):
         affiche_matrice(self.projet, 60, 68, delta_min, "black", "white", tag_interface)
@@ -633,9 +633,7 @@ class Etat():
             Dessin.delete(tag_mure)
             Dessin.delete(tag_interface)
             Dessin.delete(tag_kitsoin)
-            Dessin.delete(tag_transition)
-
-        
+            Dessin.delete(tag_transition)     
 
 class Objet():
     def __init__(self):
@@ -709,6 +707,9 @@ class Boss():
     def __init__(self):
         self.tic = 50
         self.temps = 0
+        self.poser_bombe = pnm.pbm_vers_matrice("/Users/burlakov/brickman/interface/techniques/poser_bombe.pbm")
+        self.espace = pnm.pbm_vers_matrice("/Users/burlakov/brickman/interface/techniques/espace.pbm")
+        self.poser_bombe_etat = True
         self.mort_etat = False
         self.position_X = 20
         self.position_Y = 5
@@ -733,6 +734,9 @@ class Boss():
             Dessin.delete(tag_boss)
             return 
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
+            if self.poser_bombe_etat:
+                affiche_matrice(self.poser_bombe, 3, 14, delta, "white", "black", tag_boss)
+                affiche_matrice(self.espace, 3, 21, delta, "white", "black", tag_boss)
             self.boss_controle()
             self.creer_boss()
         elif carte.niveau_actuel == 4 and brickman.vie_etat and self.sante <= 0:
@@ -749,6 +753,7 @@ class Boss():
     
     def boss_controle(self):
         if self.temps - self.boss_start > 100 and not self.etat_combat:
+            self.poser_bombe_etat = False
             self.etat_combat = True
         elif self.etat_combat and self.etat_deplacement == False:
             self.cords = self.choix_deplacement()
@@ -821,8 +826,8 @@ class Bombe():
         elif carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0: 
             Dessin.delete(tag_bombe)
             self.creer_bombes()
+            #print(self.cords_bombes)
             self.bombe_destructeur()
-            self.changeur_couleur()
     
     def creer_bombes(self):
         for cords in self.cords_bombes:
@@ -830,11 +835,10 @@ class Bombe():
 
     def ajouter_bombe(self, event):
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
+            for cords in self.cords_bombes:
+                if cords[0] == brickman.position_X and cords[1] == brickman.position_Y:
+                    return 
             self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
-            
-    def changeur_couleur(self):
-        if carte.niveau_actuel == 4 and brickman.vie_etat and self.temps_dernier_creation != None and self.temps - self.temps_dernier_creation > 50:
-            brickman.couleur = BRICKMAN_COULEUR
 
     def bombe_destructeur(self):
         bombes_expirees = [bomb for bomb in self.cords_bombes if self.temps - bomb[2] > 200]

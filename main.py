@@ -23,6 +23,7 @@ tag_transition = "transition"
 tag_boss = "boss"
 tag_ecran_noir = "ecran_noir"
 tag_bombe = "bombe"
+tag_fin = "fin"
 
 BOSS_SANTE = 200
 BRICKMAN_SANTE = 100
@@ -319,7 +320,7 @@ class Carte():
         elif self.niveau_actuel == 4:
             affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
     
-    def tutoriel(self):            
+    def tutoriel(self):
         carre(cord_transformer(self.sortie_position_X, self.sortie_position_Y, delta), "pink", "black", tag_tuto)
         carre(cord_transformer(self.kitsoin_position_X, self.kitsoin_position_Y, delta,), "green", "black", tag_tuto)
         affiche_matrice(self.tuto, 0, 0, delta, "white", "black", tag_tuto)
@@ -536,13 +537,23 @@ class Etat():
         self.transition_etat = False
         self.niv_charge_etat = False
         self.niveau_donnees_dict = None
-        self.ecran_noir_path = "./interface/limbo/ecran_noir.pbm"
+        self.fin_position_X = 5
+        self.fin_position_Y = 37
+        self.ecran_noir_path = pnm.pbm_vers_matrice("./interface/techniques/ecran_noir.pbm")
+        self.cellardoor = pnm.pbm_vers_matrice("./interface/techniques/cellardoor.pbm")
+        self.par = pnm.pbm_vers_matrice("./interface/techniques/par.pbm")
+        self.coeur = pnm.ppm_vers_matrice("./interface/techniques/coeur.ppm")
+        self.code_avec = pnm.pbm_vers_matrice('./interface/techniques/code_avec.pbm')
         self.affichage()
         
     def affichage(self):
         Dessin.delete(tag_transition)
         if fin_etat:
-            Dessin.delete(tag_transition)
+            Dessin.delete(tag_fin)
+            affiche_matrice(etat.code_avec, 7, 1, delta, "white", "black", tag_fin)
+            affiche_matrice_rgb(etat.coeur, 17, 15, delta, "black", tag_fin)
+            affiche_matrice(etat.par, 2, 59, delta_min, "white", "black", tag_fin)
+            affiche_matrice(etat.cellardoor, 5, 33, delta, "white", "black", tag_fin)
             return
         if carte.niveau_actuel > 0 and brickman.vie_etat:
             self.niveau_chargeur()
@@ -622,7 +633,7 @@ class Etat():
 
     def afficher_fin(self):
         global fin_etat 
-        carre(cord_transformer(5, 37, delta), "pink", "black", tag_transition)
+        carre(cord_transformer(self.fin_position_X, self.fin_position_Y, delta), "pink", "black", tag_transition)
         if brickman.position_X == 5 and brickman.position_Y == 37:
             self.ecran_noir()
             fin_etat = True
@@ -633,7 +644,7 @@ class Etat():
             Dessin.delete(tag_mure)
             Dessin.delete(tag_interface)
             Dessin.delete(tag_kitsoin)
-            Dessin.delete(tag_transition)     
+            Dessin.delete(tag_transition)        
 
 class Objet():
     def __init__(self):
@@ -700,15 +711,15 @@ class Objet():
                     brickman.sante += self.kitsoin_bonus
                 #print(f'brickman sante apres -> {brickman.sante}')
                 if carte.niveau_actuel == 4:
-                    print(self.kitsoin_counter)
+                    #print(self.kitsoin_counter)
                     self.kitsoin_counter -= 1
 
 class Boss():
     def __init__(self):
         self.tic = 50
         self.temps = 0
-        self.poser_bombe = pnm.pbm_vers_matrice("/Users/burlakov/brickman/interface/techniques/poser_bombe.pbm")
-        self.espace = pnm.pbm_vers_matrice("/Users/burlakov/brickman/interface/techniques/espace.pbm")
+        self.poser_bombe = pnm.pbm_vers_matrice("./interface/techniques/poser_bombe.pbm")
+        self.espace = pnm.pbm_vers_matrice("./interface/techniques/espace.pbm")
         self.poser_bombe_etat = True
         self.mort_etat = False
         self.position_X = 20
@@ -942,11 +953,12 @@ bouton_lumiere_1.pack()
 bouton_lumiere_2.pack()
 button_quitter.pack(side='right')
 
-root.bind('<Up>', brickman.deplacer_haut)
-root.bind('<Down>', brickman.deplacer_bas)
-root.bind('<Left>', brickman.deplacer_gauche)
-root.bind('<Right>', brickman.deplacer_droite)
-root.bind('<space>', bombe.ajouter_bombe)
+if fin_etat == False:
+    root.bind('<Up>', brickman.deplacer_haut)
+    root.bind('<Down>', brickman.deplacer_bas)
+    root.bind('<Left>', brickman.deplacer_gauche)
+    root.bind('<Right>', brickman.deplacer_droite)
+    root.bind('<space>', bombe.ajouter_bombe)
 
 tictac_carte()
 tictac_objet()

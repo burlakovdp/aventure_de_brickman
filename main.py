@@ -84,12 +84,14 @@ def parseur(path):
             for cords in cords_brutes:
                 cord = cords.split(',')
                 print(cord)
-                if len(cord) == 8:
+                if len(cord) == 10:
+                    tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5]), int(cord[6]), int(cord[7]), int(cord[8]), int(cord[9])))
+                elif len(cord) == 8:
                     tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5]), int(cord[6]), int(cord[7])))
                 elif len(cord) == 6:
                     tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5])))
                 else:
-                    tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3])))
+                    pass
             niveau_donnees_dict['guerrier_position'] = tmp
         else:
             for num in index[1]:
@@ -390,7 +392,6 @@ class Brickman():
             self.creer_brickman(self.position_X, self.position_Y)
         elif carte.niveau_actuel >= 1:
             self.creer_brickman(self.position_X, self.position_Y)
-            self.dommage()
             self.mort()
 
     def creer_brickman(self, x, y):
@@ -484,10 +485,6 @@ class Brickman():
                 return
             self.position_X += 1
     
-    def dommage(self):
-        if self.position_X == adversaire.position_X and self.position_Y == adversaire.position_Y:
-            brickman.sante -= 5
-    
     def mort(self):
         if self.sante <= 0:
             if not self.deplacement_etat: 
@@ -513,6 +510,7 @@ class Adversaire():
         self.position_X = 5
         self.position_Y = 3
         self.sens_etat = True
+        self.guerrier_dommage = 1
         self.affichage()
     
     def affichage(self):
@@ -520,52 +518,131 @@ class Adversaire():
         if carte.niveau_actuel == 4:
             self.position_X = -1
             self.position_Y = -1
-        if carte.niveau_actuel >= 1 and carte.niveau_actuel < 4 and brickman.vie_etat:
-            self.deplacement_ia(1,2,3,4)
-            self.creer_guerrier()
-            self.tic = 500
+        if carte.niveau_actuel >= 1 and carte.niveau_actuel < 4 and brickman.vie_etat and etat.niv_charge_etat:
+            self.dommage()
+            self.capitaine()
+            self.tic = 250
 
-    def creer_guerrier(self):
-        carre(cord_transformer(self.position_X, self.position_Y, delta), "red", "black", tag_adversaire)
+    def creer_guerrier(self, x, y):
+        carre(cord_transformer(x, y, delta), "red", "black", tag_adversaire)
     
-    def deplacement_ia(self, x0, y0, x1, y1):
-        if self.position_X - 1 == x0 or self.position_X + 1 == x1 or self.position_Y - 1 == y0 or self.position_Y + 1 == y1:
-            return
-        elif self.position_X != brickman.position_X and self.position_Y != brickman.position_Y:
-            if self.position_Y < brickman.position_Y:
-                self.position_Y += 1
+    def capitaine(self):
+        for i in range(len(etat.niveau_donnees_dict['guerrier_position'])):
+            if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 10:
+                pass
+            if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 8:
+                if etat.niveau_donnees_dict['guerrier_position'][i][6] == 0 and etat.niveau_donnees_dict['guerrier_position'][i][7] == 0:
+                    etat.niveau_donnees_dict['guerrier_position'][i] = (
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1],
+                        etat.niveau_donnees_dict['guerrier_position'][i][2],
+                        etat.niveau_donnees_dict['guerrier_position'][i][3],
+                        etat.niveau_donnees_dict['guerrier_position'][i][4],
+                        etat.niveau_donnees_dict['guerrier_position'][i][5],
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1] 
+                    )
+                self.creer_guerrier(etat.niveau_donnees_dict['guerrier_position'][i][6], etat.niveau_donnees_dict['guerrier_position'][i][7])
+                etat.niveau_donnees_dict['guerrier_position'][i] = self.deplacement_ia(etat.niveau_donnees_dict['guerrier_position'][i][0],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][1],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][2],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][3],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][4],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][5],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][6],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][7]                                                                                 
+                                                                                       )
+            if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 6:
+                if etat.niveau_donnees_dict['guerrier_position'][i][4] == 0 and etat.niveau_donnees_dict['guerrier_position'][i][5] == 0:
+                    etat.niveau_donnees_dict['guerrier_position'][i] = (
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1],
+                        etat.niveau_donnees_dict['guerrier_position'][i][2],
+                        etat.niveau_donnees_dict['guerrier_position'][i][3],
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1],
+                    )
+                self.creer_guerrier(etat.niveau_donnees_dict['guerrier_position'][i][4], etat.niveau_donnees_dict['guerrier_position'][i][5])
+                etat.niveau_donnees_dict['guerrier_position'][i] = self.deplacement_ligne(etat.niveau_donnees_dict['guerrier_position'][i][0],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][1],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][2],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][3],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][4],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][5],                                                                                 
+                                                                                       )
+
+    def deplacement_ia(self, x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel):    
+        zone_guerrier = set()
+        for y in range(y0_borne, y1_borne+1):
+            for x in range(x0_borne, x1_borne+1):
+                zone_guerrier.add((x, y))
+
+        if (brickman.position_X, brickman.position_Y) in zone_guerrier:
+            if x_actuel != brickman.position_X and y_actuel != brickman.position_Y:
+                if y_actuel < brickman.position_Y:
+                    y_actuel += 1
+                else:
+                    y_actuel -= 1
+                if x_actuel < brickman.position_X:
+                    x_actuel += 1
+                else:
+                    x_actuel -= 1
+            elif x_actuel == brickman.position_X and y_actuel != brickman.position_Y:
+                if y_actuel < brickman.position_Y:
+                    y_actuel += 1
+                else:
+                    y_actuel -= 1
+            elif x_actuel != brickman.position_X and y_actuel == brickman.position_Y:
+                if x_actuel < brickman.position_X:
+                    x_actuel += 1
+                else:
+                    x_actuel -= 1
+            return((x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel))  
+         
+        elif (brickman.position_X, brickman.position_Y) not in zone_guerrier:
+            if x_actuel == x_initial and y_actuel == y_initial:
+                return((x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel))
+            elif x_actuel != x_initial and y_actuel != y_initial:
+                if y_actuel < y_initial:
+                    y_actuel += 1
+                else:
+                    y_actuel -= 1
+                if x_actuel < x_initial:
+                    x_actuel += 1
+                else:
+                    x_actuel -= 1
+            elif x_actuel == x_initial and y_actuel != y_initial:
+                if y_actuel < y_initial:
+                    y_actuel += 1
+                else:
+                    y_actuel -= 1
+            elif x_actuel != x_initial and y_actuel == y_initial:
+                if x_actuel < x_initial:
+                    x_actuel += 1
+                else:
+                    x_actuel -= 1
+            return((x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel))
+    
+    def deplacement_ligne(self, x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel):
+        if x_actuel == x_destination and y_actuel == y_destination:
+            return ((x_destination, y_destination, x_initial, y_initial, x_actuel, y_actuel))
+        elif x_initial == x_destination:
+            if y_actuel < y_destination:
+                y_actuel += 1
             else:
-                self.position_Y -= 1
-            if self.position_X < brickman.position_X:
-                self.position_X += 1
+                y_actuel -= 1
+            return ((x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel))
+        elif y_initial == y_destination:
+            if x_actuel < x_destination:
+                x_actuel += 1
             else:
-                self.position_X -= 1
-        elif self.position_X == brickman.position_X and self.position_Y != brickman.position_Y:
-            if self.position_Y < brickman.position_Y:
-                self.position_Y += 1
-            else:
-                self.position_Y -= 1
-        elif self.position_X != brickman.position_X and self.position_Y == brickman.position_Y:
-            if self.position_X < brickman.position_X:
-                self.position_X += 1
-            else:
-                self.position_X -= 1
+                x_actuel -= 1
+            return ((x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel))
 
-        
-
-
-    def deplacement(self):
-        if self.position_Y == 3:
-            self.sens_etat = True
-
-        if self.position_Y == 5:
-            self.sens_etat = False
-
-        if self.sens_etat == True:
-            self.position_Y += 1
-
-        if self.sens_etat == False:
-            self.position_Y -= 1
+    def dommage(self):
+        for cord in etat.niveau_donnees_dict['guerrier_position']:
+            if (brickman.position_X, brickman.position_Y) == (cord[len(cord)-2], cord[len(cord)-1]):
+                brickman.sante -= self.guerrier_dommage
 
 class Etat():
     def __init__(self):

@@ -83,7 +83,13 @@ def parseur(path):
             tmp = []
             for cords in cords_brutes:
                 cord = cords.split(',')
-                tmp.append((int(cord[0]), int(cord[1])))
+                print(cord)
+                if len(cord) == 8:
+                    tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5]), int(cord[6]), int(cord[7])))
+                elif len(cord) == 6:
+                    tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5])))
+                else:
+                    tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3])))
             niveau_donnees_dict['guerrier_position'] = tmp
         else:
             for num in index[1]:
@@ -515,20 +521,21 @@ class Adversaire():
             self.position_X = -1
             self.position_Y = -1
         if carte.niveau_actuel >= 1 and carte.niveau_actuel < 4 and brickman.vie_etat:
-            self.deplacement_ia()
+            self.deplacement_ia(1,2,3,4)
             self.creer_guerrier()
             self.tic = 500
 
     def creer_guerrier(self):
         carre(cord_transformer(self.position_X, self.position_Y, delta), "red", "black", tag_adversaire)
     
-    def deplacement_ia(self):
-        if self.position_X != brickman.position_X and self.position_Y != brickman.position_Y:
+    def deplacement_ia(self, x0, y0, x1, y1):
+        if self.position_X - 1 == x0 or self.position_X + 1 == x1 or self.position_Y - 1 == y0 or self.position_Y + 1 == y1:
+            return
+        elif self.position_X != brickman.position_X and self.position_Y != brickman.position_Y:
             if self.position_Y < brickman.position_Y:
                 self.position_Y += 1
             else:
                 self.position_Y -= 1
-
             if self.position_X < brickman.position_X:
                 self.position_X += 1
             else:
@@ -543,8 +550,6 @@ class Adversaire():
                 self.position_X += 1
             else:
                 self.position_X -= 1
-        elif self.position_X == brickman.position_X and self.position_Y == brickman.position_Y:
-            pass
 
         
 
@@ -649,6 +654,7 @@ class Etat():
         if not self.niv_charge_etat:
             if carte.niveau_actuel == 1:
                 self.niveau_donnees_dict = parseur(carte.niveau_1_donnees)
+                print(self.niveau_donnees_dict)
             elif carte.niveau_actuel == 2:
                 self.niveau_donnees_dict = parseur(carte.niveau_2_donnees)
             elif carte.niveau_actuel == 3:

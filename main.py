@@ -26,6 +26,8 @@ tag_bombe = "bombe"
 tag_fin = "fin"
 
 BOSS_SANTE = 200
+BOSS_INITIAL_POSITION_X = 20
+BOSS_INITIAL_POSITION_Y = 5
 BRICKMAN_SANTE = 100
 BRICKMAN_COULEUR = "yellow"
 
@@ -256,13 +258,18 @@ class Limbo():
                 brickman.vie_etat = True
                 brickman.sante = BRICKMAN_SANTE
                 if carte.niveau_actuel == 4:
+                        boss.boss_start = boss.temps
+                        boss.tuto_poser_bombe_etat = True
                         objet.kitsoin_positions.clear()
                         objet.kitsoin_counter = 0
-                        objet.temps_dernier_creation == None
+                        objet.temps_dernier_creation = None
                         boss.sante = BOSS_SANTE
+                        boss.position_X = BOSS_INITIAL_POSITION_X
+                        boss.position_Y = BOSS_INITIAL_POSITION_Y
                         boss.etat_combat = False
-                        boss.position_X = random.randint(1, 42)
-                        boss.position_Y = 5
+                        boss.etat_deplacement = False
+                        boss.etat_deplacement_X = False
+                        boss.etat_deplacement_Y = False
                         boss.affichage()
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()
@@ -508,13 +515,40 @@ class Adversaire():
             self.position_X = -1
             self.position_Y = -1
         if carte.niveau_actuel >= 1 and carte.niveau_actuel < 4 and brickman.vie_etat:
-            self.deplacement()
+            self.deplacement_ia()
             self.creer_guerrier()
             self.tic = 500
 
     def creer_guerrier(self):
         carre(cord_transformer(self.position_X, self.position_Y, delta), "red", "black", tag_adversaire)
     
+    def deplacement_ia(self):
+        if self.position_X != brickman.position_X and self.position_Y != brickman.position_Y:
+            if self.position_Y < brickman.position_Y:
+                self.position_Y += 1
+            else:
+                self.position_Y -= 1
+
+            if self.position_X < brickman.position_X:
+                self.position_X += 1
+            else:
+                self.position_X -= 1
+        elif self.position_X == brickman.position_X and self.position_Y != brickman.position_Y:
+            if self.position_Y < brickman.position_Y:
+                self.position_Y += 1
+            else:
+                self.position_Y -= 1
+        elif self.position_X != brickman.position_X and self.position_Y == brickman.position_Y:
+            if self.position_X < brickman.position_X:
+                self.position_X += 1
+            else:
+                self.position_X -= 1
+        elif self.position_X == brickman.position_X and self.position_Y == brickman.position_Y:
+            pass
+
+        
+
+
     def deplacement(self):
         if self.position_Y == 3:
             self.sens_etat = True
@@ -720,12 +754,12 @@ class Boss():
         self.temps = 0
         self.poser_bombe = pnm.pbm_vers_matrice("./interface/techniques/poser_bombe.pbm")
         self.espace = pnm.pbm_vers_matrice("./interface/techniques/espace.pbm")
-        self.poser_bombe_etat = True
+        self.tuto_poser_bombe_etat = True
         self.mort_etat = False
-        self.position_X = 20
-        self.position_Y = 5
+        self.position_X = BOSS_INITIAL_POSITION_X
+        self.position_Y = BOSS_INITIAL_POSITION_Y
         self.initial_Y = 5
-        self.dommage = 1
+        self.dommage = 50
         self.sante = BOSS_SANTE
         self.etat_combat = False
         self.etat_deplacement = False
@@ -745,7 +779,7 @@ class Boss():
             Dessin.delete(tag_boss)
             return 
         if carte.niveau_actuel == 4 and brickman.vie_etat and boss.sante > 0:
-            if self.poser_bombe_etat:
+            if self.tuto_poser_bombe_etat:
                 affiche_matrice(self.poser_bombe, 3, 14, delta, "white", "black", tag_boss)
                 affiche_matrice(self.espace, 3, 21, delta, "white", "black", tag_boss)
             self.boss_controle()
@@ -763,8 +797,8 @@ class Boss():
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
     
     def boss_controle(self):
-        if self.temps - self.boss_start > 100 and not self.etat_combat:
-            self.poser_bombe_etat = False
+        if self.temps - self.boss_start > 100 and self.etat_combat == False:
+            self.tuto_poser_bombe_etat = False
             self.etat_combat = True
         elif self.etat_combat and self.etat_deplacement == False:
             self.cords = self.choix_deplacement()

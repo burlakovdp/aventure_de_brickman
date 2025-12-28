@@ -529,7 +529,31 @@ class Adversaire():
     def capitaine(self):
         for i in range(len(etat.niveau_donnees_dict['guerrier_position'])):
             if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 10:
-                pass
+                if etat.niveau_donnees_dict['guerrier_position'][i][8] == 0 and etat.niveau_donnees_dict['guerrier_position'][i][9] == 0:
+                    etat.niveau_donnees_dict['guerrier_position'][i] = (
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1],
+                        etat.niveau_donnees_dict['guerrier_position'][i][2],
+                        etat.niveau_donnees_dict['guerrier_position'][i][3],
+                        etat.niveau_donnees_dict['guerrier_position'][i][4],
+                        etat.niveau_donnees_dict['guerrier_position'][i][5],
+                        etat.niveau_donnees_dict['guerrier_position'][i][6],
+                        etat.niveau_donnees_dict['guerrier_position'][i][7],
+                        etat.niveau_donnees_dict['guerrier_position'][i][0],
+                        etat.niveau_donnees_dict['guerrier_position'][i][1]
+                    )
+                self.creer_guerrier(etat.niveau_donnees_dict['guerrier_position'][i][8], etat.niveau_donnees_dict['guerrier_position'][i][9])
+                etat.niveau_donnees_dict['guerrier_position'][i] = self.deplacement_carre(etat.niveau_donnees_dict['guerrier_position'][i][0],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][1],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][2],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][3],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][4],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][5],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][6],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][7],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][8],
+                                                                                       etat.niveau_donnees_dict['guerrier_position'][i][9]                                                                                                                                          
+                                                                                       )
             if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 8:
                 if etat.niveau_donnees_dict['guerrier_position'][i][6] == 0 and etat.niveau_donnees_dict['guerrier_position'][i][7] == 0:
                     etat.niveau_donnees_dict['guerrier_position'][i] = (
@@ -639,6 +663,24 @@ class Adversaire():
                 x_actuel -= 1
             return ((x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel))
 
+    def deplacement_carre(self, x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel):
+        if y_actuel == y1 and x_actuel != x1:
+            if x_actuel < x1:
+                x_actuel +=1
+            return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel))
+        elif y_actuel != y2 and x_actuel == x1:
+            if y_actuel < y2:
+                y_actuel += 1
+            return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel))
+        elif y_actuel == y2 and x_actuel != x3:
+            if x_actuel > x3:
+                x_actuel -= 1
+            return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel))
+        elif x_actuel == x3 and y_actuel != y_initial:
+            if y_actuel > y_initial:
+                y_actuel -= 1
+            return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel))
+        #guerrier_position:(x_initial,y_initial, x1, y1, x2, y2, x3, y3, curr_x, curr_y)
     def dommage(self):
         for cord in etat.niveau_donnees_dict['guerrier_position']:
             if (brickman.position_X, brickman.position_Y) == (cord[len(cord)-2], cord[len(cord)-1]):

@@ -904,7 +904,7 @@ class Boss():
         self.position_X = BOSS_INITIAL_POSITION_X
         self.position_Y = BOSS_INITIAL_POSITION_Y
         self.initial_Y = 5
-        self.dommage = 50
+        self.dommage = 25
         self.sante = BOSS_SANTE
         self.etat_combat = False
         self.etat_deplacement = False
@@ -1001,7 +1001,7 @@ class Bombe():
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 50
+        self.dommage = 5
         self.temps_dernier_creation = None
         self.affichage()
     

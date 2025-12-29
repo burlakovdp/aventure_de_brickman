@@ -904,7 +904,7 @@ class Boss():
         self.position_X = BOSS_INITIAL_POSITION_X
         self.position_Y = BOSS_INITIAL_POSITION_Y
         self.initial_Y = 5
-        self.dommage = 25
+        self.dommage = 10
         self.sante = BOSS_SANTE
         self.etat_combat = False
         self.etat_deplacement = False

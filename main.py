@@ -718,6 +718,7 @@ class Etat():
         self.niveau_donnees_dict = None
         self.fin_position_X = 5
         self.fin_position_Y = 37
+        self.dernier_dommage = None
         self.ecran_noir_path = pnm.pbm_vers_matrice("./interface/techniques/ecran_noir.pbm")
         self.cellardoor = pnm.pbm_vers_matrice("./interface/techniques/cellardoor.pbm")
         self.par = pnm.pbm_vers_matrice("./interface/techniques/par.pbm")
@@ -770,9 +771,13 @@ class Etat():
 
     def dommage_boss(self):
         cords_brickman = (brickman.position_X, brickman.position_Y)
-
+        
+        if self.dernier_dommage == None:
+            self.dernier_dommage = self.temps
         if cords_brickman in boss.cords_boss():
-            brickman.sante -= boss.dommage
+            if self.temps - self.dernier_dommage > 10:
+                brickman.sante -= boss.dommage
+                self.dernier_dommage = self.temps
 
         bombe_utilise = []
         for cord in bombe.cords_bombes:

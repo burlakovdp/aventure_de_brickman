@@ -520,7 +520,7 @@ class Adversaire():
         if carte.niveau_actuel >= 1 and carte.niveau_actuel < 4 and brickman.vie_etat and etat.niv_charge_etat:
             self.dommage()
             self.capitaine()
-            self.tic = 10
+            self.tic = 20
 
     def dommage(self):
         for cord in etat.niveau_donnees_dict['guerrier_position']:

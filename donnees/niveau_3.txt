@@ -1,6 +1,6 @@
-brickman_pos_X:3
-brickman_pos_Y:3
-transition_pos_X:1
-transition_pos_Y:1
-kitsoin_position:3,0;4,5;6,9
-guerrier_position:4,5;6,7;2,4
+brickman_pos_X:2
+brickman_pos_Y:37
+transition_pos_X:0
+transition_pos_Y:0
+kitsoin_position:0,0
+guerrier_position:0,0

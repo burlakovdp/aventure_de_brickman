@@ -82,7 +82,6 @@ def parseur(path):
             tmp = []
             for cords in cords_brutes:
                 cord = cords.split(',')
-                #print(cord)
                 if len(cord) == 12:
                     tmp.append((int(cord[0]), int(cord[1]), int(cord[2]), int(cord[3]), int(cord[4]), int(cord[5]), int(cord[6]), int(cord[7]), int(cord[8]), int(cord[9]), int(cord[10]), int(cord[11])))
                 elif len(cord) == 10:
@@ -148,7 +147,6 @@ class Interface():
             self.creer_projet()
         if carte.niveau_actuel >= 0 and brickman.vie_etat:
             self.brickman_sante_statut()
-            #self.sante_statut_etat = True
         if carte.niveau_actuel == 3 and brickman.vie_etat:
             self.boss_sante_statut()
         
@@ -203,7 +201,6 @@ class Interface():
         
     def boss_sante_statut(self):
         brick_counter = (boss.sante*self.ligne_sante*2)//BOSS_SANTE
-        #print(brick_counter)
         if brick_counter < self.ligne_sante:
             #ligne 1
             for i in range(self.ligne_sante):
@@ -291,11 +288,9 @@ class Carte():
     def __init__(self):
         self.niveau_1 = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
         self.niveau_2 = pnm.pbm_vers_matrice("./cartes/niveau_2.pbm")
-        #self.niveau_3 = pnm.pbm_vers_matrice("./cartes/niveau_3.pbm")
         self.niveau_1_donnees = "./donnees/niveau_1.txt"
         self.niveau_2_donnees = "./donnees/niveau_2.txt"
         self.niveau_3_donnees = "./donnees/niveau_3.txt"
-        #self.niveau_4_donnees = "./donnees/niveau_4.txt"
         self.niveau_boss = pnm.pbm_vers_matrice("./cartes/boss_carte.pbm")
         self.tuto = pnm.pbm_vers_matrice("./interface/tuto/tuto.pbm")
         self.bouger = pnm.pbm_vers_matrice("./interface/tuto/bouger.pbm")
@@ -708,7 +703,6 @@ class Adversaire():
             if y_actuel > y_initial:
                 y_actuel -= 1
             return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel, self.temps, vitesse))
-        #guerrier_position:(x_initial,y_initial, x1, y1, x2, y2, x3, y3, curr_x, curr_y)
     
 
 class Etat():
@@ -802,7 +796,6 @@ class Etat():
         if not self.niv_charge_etat:
             if carte.niveau_actuel == 1:
                 self.niveau_donnees_dict = parseur(carte.niveau_1_donnees)
-                #print(self.niveau_donnees_dict)
             elif carte.niveau_actuel == 2:
                 self.niveau_donnees_dict = parseur(carte.niveau_2_donnees)
             elif carte.niveau_actuel == 3:
@@ -819,7 +812,6 @@ class Etat():
             self.transition_Y = self.niveau_donnees_dict['transition_pos_Y']
             objet.position_chargeur()
             self.transition()
-            #print(self.niveau_donnees_dict)
             self.niv_charge_etat = True
 
     def afficher_fin(self):
@@ -891,7 +883,6 @@ class Objet():
                     self.kitsoin_counter -= 1
 
         if (brickman.position_X, brickman.position_Y) in self.kitsoin_positions:
-            #print(f'brickman sante avant -> {brickman.sante}')
             if brickman.sante == 100:
                 return
             else:
@@ -900,9 +891,7 @@ class Objet():
                     brickman.sante = 100
                 else:
                     brickman.sante += self.kitsoin_bonus
-                #print(f'brickman sante apres -> {brickman.sante}')
                 if carte.niveau_actuel == 3:
-                    #print(self.kitsoin_counter)
                     self.kitsoin_counter -= 1
 
 class Boss():
@@ -1028,7 +1017,6 @@ class Bombe():
         elif carte.niveau_actuel == 3 and brickman.vie_etat and boss.sante > 0: 
             Dessin.delete(tag_bombe)
             self.creer_bombes()
-            #print(self.cords_bombes)
             self.bombe_destructeur()
     
     def creer_bombes(self):

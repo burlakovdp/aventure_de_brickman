@@ -326,10 +326,6 @@ class Carte():
             affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mure)
         elif self.niveau_actuel == 3:
             affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
-        """
-        elif self.niveau_actuel == 4:
-            affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
-        """
     
     def tutoriel(self):
         carre(cord_transformer(self.sortie_position_X, self.sortie_position_Y, delta), "pink", "black", tag_tuto)
@@ -355,11 +351,6 @@ class Carte():
         elif self.niveau_actuel == 3:
             if self.niveau_boss[y][x] == 1:
                 return True
-        """
-        elif self.niveau_actuel == 4:
-            if self.niveau_boss[y][x] == 1:
-                return True
-        """
         return False
 
     def sortie_tuto(self):
@@ -801,11 +792,7 @@ class Etat():
             elif carte.niveau_actuel == 3:
                 objet.kitsoin_positions.clear()
                 self.niveau_donnees_dict = parseur(carte.niveau_3_donnees)
-            """
-            elif carte.niveau_actuel == 4:
-                objet.kitsoin_positions.clear()
-                self.niveau_donnees_dict = parseur(carte.niveau_4_donnees) 
-            """
+
             brickman.position_X = self.niveau_donnees_dict['brickman_pos_X']
             brickman.position_Y = self.niveau_donnees_dict['brickman_pos_Y']
             self.transition_X = self.niveau_donnees_dict['transition_pos_X']

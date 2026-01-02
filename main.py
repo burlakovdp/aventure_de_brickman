@@ -98,7 +98,7 @@ def parseur(path):
             niveau_donnees_dict[index[0]] = int(cords_brutes)
         cords_brutes = ''
 
-        fichier.close()
+    fichier.close()
     return niveau_donnees_dict
 
 class Interface():
@@ -265,6 +265,7 @@ class Limbo():
                         boss.boss_start = boss.temps
                         boss.tuto_poser_bombe_etat = True
                         objet.kitsoin_positions.clear()
+                        bombe.cords_bombes.clear()
                         objet.kitsoin_counter = 0
                         objet.temps_dernier_creation = None
                         boss.sante = BOSS_SANTE
@@ -763,7 +764,7 @@ class Etat():
         if self.dernier_dommage == None:
             self.dernier_dommage = self.temps
         if cords_brickman in boss.cords_boss():
-            if self.temps - self.dernier_dommage > 10:
+            if self.temps - self.dernier_dommage > 15:
                 brickman.sante -= boss.dommage
                 self.dernier_dommage = self.temps
 
@@ -988,7 +989,7 @@ class Bombe():
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 50
+        self.dommage = 15
         self.temps_dernier_creation = None
         self.affichage()
     

@@ -510,7 +510,7 @@ class Adversaire():
         if carte.niveau_actuel >= 1 and carte.niveau_actuel < 3 and brickman.vie_etat and etat.niv_charge_etat:
             self.dommage()
             self.capitaine()
-            self.tic = 20
+            self.tic = 40
 
     def dommage(self):
         for cord in etat.niveau_donnees_dict['guerrier_position']:
@@ -566,7 +566,6 @@ class Adversaire():
                         self.temps,
                         etat.niveau_donnees_dict['guerrier_position'][i][9] 
                     )
-                    print(etat.niveau_donnees_dict['guerrier_position'][i])
                 self.creer_guerrier(etat.niveau_donnees_dict['guerrier_position'][i][6], etat.niveau_donnees_dict['guerrier_position'][i][7])
                 etat.niveau_donnees_dict['guerrier_position'][i] = self.deplacement_ia(etat.niveau_donnees_dict['guerrier_position'][i][0],
                                                                                        etat.niveau_donnees_dict['guerrier_position'][i][1],

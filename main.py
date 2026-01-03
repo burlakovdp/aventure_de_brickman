@@ -989,7 +989,7 @@ class Bombe():
         self.temps = 0
         self.tic = 10
         self.cords_bombes = set()
-        self.dommage = 15
+        self.dommage = 10
         self.temps_dernier_creation = None
         self.affichage()
     

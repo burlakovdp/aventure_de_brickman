@@ -14,6 +14,13 @@ This project is a 2D arcade game developed in **Python** as part of my first sem
 
 The player controls **Brickman**, a hero who must escape a series of mazes, survive against the **Redmans**, and defeat their leader, the **Redman Chief** (The Boss).
 
+## Gameplay Demo
+
+| Exploration & Redmans | Boss Fight Strategy |
+| :---: | :---: |
+| <img src="readme/ai_redman_kitsoin_demo.gif" alt="Exploration" width="100%"> | <img src="readme/boss_fight_demo.gif" alt="Boss Fight" width="100%"> |
+| *Navigating the maze and avoiding enemies* | *Using bombs to defeat the Redman Chief* |
+
 ## Tools and Libraries
 The game was developed under the following academic constraints:
 * **Language:** Python 3

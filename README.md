@@ -1,3 +1,7 @@
+<div align="center">
+<img alt="Preview" src="readme/logo_aventure_de_brickman.jpg" width=100% />
+</div>
+
 # Aventure de Brickman : Les Labyrinthes des Redmans
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white) ![Tkinter](https://img.shields.io/badge/Tkinter-GUI-3776AB?style=for-the-badge&logo=python&logoColor=yellow) ![PNM](https://img.shields.io/badge/PNM-Custom_Lib-orange?style=for-the-badge) ![OS](https://img.shields.io/badge/OS-Windows_|_macOS_|_Linux-9cf?style=for-the-badge&logo=linux&logoColor=white) ![UCA](https://img.shields.io/badge/Univ-Côte_d'Azur-007EC7?style=for-the-badge&logo=academic-cap&logoColor=white)

@@ -1,8 +1,8 @@
-<div align="center">
-<img alt="Preview" src="readme/logo_aventure_de_brickman.jpg" width=100% />
-</div>
-
 # Aventure de Brickman : Les Labyrinthes des Redmans
+
+<p align="center">
+  <img src="readme/logo_aventure_de_brickman.jpg" alt="Logo Aventure de Brickman" width="600">
+</p>
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white) ![Tkinter](https://img.shields.io/badge/Tkinter-GUI-3776AB?style=for-the-badge&logo=python&logoColor=yellow) ![PNM](https://img.shields.io/badge/PNM-Custom_Lib-orange?style=for-the-badge) ![OS](https://img.shields.io/badge/OS-Windows_|_macOS_|_Linux-9cf?style=for-the-badge&logo=linux&logoColor=white) ![UCA](https://img.shields.io/badge/Univ-Côte_d'Azur-007EC7?style=for-the-badge&logo=academic-cap&logoColor=white)
 
@@ -40,16 +40,17 @@ To run this project, you need:
 ## Installation and Launch
 
 1.  Clone this repository (or download the files):
-    ````bash
+    ```bash
     git clone https://github.com/burlakovdp/aventure_de_brickman.git
-
     cd aventure_de_brickman
-    
+    ```
+
 2.  Ensure all resource files (folders `interface`, `cartes`, `donnees`, `limbo`) and the `pnm.py` module are present in the root directory.
 
 3.  Run the game:
     ```bash
     python main.py
+    ```
 
 ## Controls
 

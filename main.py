@@ -3,8 +3,7 @@ import pnm
 import random
 
 root = tk.Tk()
-root.title("Aventure de Brickman")
-#root.state('zoomed')
+root.title("Aventure de Brickman : Les Labyrinthes des Redmans")
 
 Hauteur = 820
 Largeur = 980
@@ -41,6 +40,7 @@ def carre(cords, couleur, couleur_outline, tag):
     Dessin.create_rectangle(x0, y0, x1, y1, fill=couleur, outline=couleur_outline, tags=tag)
 
 def cord_transformer(x, y, delta):
+    """ Convertit les coordonnées des cases (taille delta) pour créer des carrés """
     x0 = (x*delta)+3
     y0 = (y*delta)+3
     x1 = x*delta+delta+3
@@ -61,6 +61,7 @@ def affiche_matrice_rgb(M, x0, y0, delta, bordure, tag ):
                 carre(cord_transformer(j+x0,i+y0, delta), pnm.hexa(M[i][j]), bordure, tag)
 
 def parseur(path):
+    """ Lit le fichier pour trouver les positions des soldats, des kitsoins, de la transition et du spawn de Brickman """
     fichier = open(path, "r", encoding="utf-8")
 
     niveau_donnees = [e for e in fichier]
@@ -102,6 +103,7 @@ def parseur(path):
     return niveau_donnees_dict
 
 class Interface():
+    """ Gère tous les éléments de l'interface, les textes et la barre de santé """
     def __init__(self):
         self.lampe_etat = True
         self.lumiere_etat = False
@@ -161,6 +163,7 @@ class Interface():
             y0 += delta
 
     def creer_ligne_carre(self, x0, y0, x1, y1, couleur, couleur_outline):
+        """ Trace le quadrillage de l'écran selon la taille delta ou delta_min """
         if x0 == x1:
             if y0 < y1:
                 for i in range(y0, y1+1):
@@ -193,6 +196,7 @@ class Interface():
         affiche_matrice_rgb(self.lumiere, 33, 6, delta, "black", tag_interface)
 
     def brickman_sante_statut(self):
+        """ Affiche la barre de santé de Brickman """
         brick_counter = (brickman.sante*self.ligne_sante)//BRICKMAN_SANTE
         for i in range(brick_counter):
             carre(cord_transformer(self.brickman_sante_position_X0+i, self.brickman_sante_position_Y, delta), "red", "black", tag_interface)
@@ -200,6 +204,7 @@ class Interface():
             carre(cord_transformer(brick_counter+i+1, self.brickman_sante_position_Y, delta), "black", "red", tag_interface)
         
     def boss_sante_statut(self):
+        """ Affiche la barre de santé du Boss """
         brick_counter = (boss.sante*self.ligne_sante*2)//BOSS_SANTE
         if brick_counter < self.ligne_sante:
             #ligne 1
@@ -226,6 +231,7 @@ class Interface():
                     carre(cord_transformer((brick_counter%self.ligne_sante)+i+1, self.boss_sante_position_Y+1, delta), "black", "red", tag_interface)              
 
 class Limbo():
+    """ Gère le Limbo et le réveil du joueur """
     def __init__(self):
         self.limbo_letters = pnm.pbm_vers_matrice("./limbo/limbo.pbm")
         self.temps = 0
@@ -255,6 +261,7 @@ class Limbo():
         carre(cord_transformer(self.sortie_X, self.sortie_Y, delta), "pink", "black", tag_limbo)
     
     def reveil(self):
+        """ Gère le réveil du joueur """
         if brickman.position_X == self.sortie_X and brickman.position_Y == self.sortie_Y:
                 self.sortie_etat = False
                 etat.niv_charge_etat = False
@@ -286,6 +293,7 @@ class Limbo():
         return False
 
 class Carte():
+    """ Gère l'affichage des cartes et les collisions """
     def __init__(self):
         self.niveau_1 = pnm.pbm_vers_matrice("./cartes/niveau_1.pbm")
         self.niveau_2 = pnm.pbm_vers_matrice("./cartes/niveau_2.pbm")
@@ -321,6 +329,7 @@ class Carte():
             self.labyrinthe()
 
     def labyrinthe(self):
+        """ Dessine les cartes """
         if self.niveau_actuel == 1:
             affiche_matrice(self.niveau_1, 0, 0, delta, "white", "black", tag_mure)
         elif self.niveau_actuel == 2:
@@ -329,6 +338,7 @@ class Carte():
             affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
     
     def tutoriel(self):
+        """ Gère le tutoriel au début du jeu """
         carre(cord_transformer(self.sortie_position_X, self.sortie_position_Y, delta), "pink", "black", tag_tuto)
         carre(cord_transformer(self.kitsoin_position_X, self.kitsoin_position_Y, delta,), "green", "black", tag_tuto)
         affiche_matrice(self.tuto, 0, 0, delta, "white", "black", tag_tuto)
@@ -362,6 +372,7 @@ class Carte():
             etat.affichage()  
 
 class Brickman():
+    """ Gère le personnage Brickman """
     def __init__(self):
         self.position_X = 10
         self.position_Y = 21
@@ -387,6 +398,7 @@ class Brickman():
     def creer_brickman(self, x, y):
         carre(cord_transformer(x, y, delta), self.couleur, "black", tag_brickman)
 
+    """ Gère les déplacements et les collisions """
     def deplacer_haut(self, event):
         if brickman.vie_etat and carte.niveau_actuel == 3:
             return 
@@ -475,6 +487,7 @@ class Brickman():
                 return
             self.position_X += 1
 
+    """ Gère la mort de Brickman et son transfert vers le Limbo """
     def mort(self):
         if self.sante <= 0:
             if not self.deplacement_etat: 
@@ -494,6 +507,7 @@ class Brickman():
                 self.deplacement_etat = True
 
 class Adversaire():
+    """ Gère tous les guerriers (sauf le Boss) """
     def __init__(self):
         self.temps = 0
         self.tic = 10
@@ -514,6 +528,7 @@ class Adversaire():
             self.tic = 40
 
     def dommage(self):
+        """ Gère les dégâts des guerriers sur Brickman """
         for cord in etat.niveau_donnees_dict['guerrier_position']:
             if (brickman.position_X, brickman.position_Y) == (cord[len(cord)-4], cord[len(cord)-3]):
                 brickman.sante -= self.guerrier_dommage
@@ -522,6 +537,7 @@ class Adversaire():
         carre(cord_transformer(x, y, delta), "red", "black", tag_adversaire)
     
     def capitaine(self):
+        """ Gère tous les guerriers sur la carte """
         for i in range(len(etat.niveau_donnees_dict['guerrier_position'])):
             if len(etat.niveau_donnees_dict['guerrier_position'][i]) == 12:
                 if etat.niveau_donnees_dict['guerrier_position'][i][8] == 0 and etat.niveau_donnees_dict['guerrier_position'][i][9] == 0:
@@ -603,6 +619,7 @@ class Adversaire():
                                                                                        )
 
     def deplacement_ia(self, x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel, temps_dernier_deplacement, vitesse):    
+        """ Poursuit Brickman s'il entre dans la zone de détection """
         zone_guerrier = set()
         for y in range(y0_borne, y1_borne+1):
             for x in range(x0_borne, x1_borne+1):
@@ -658,6 +675,7 @@ class Adversaire():
             return((x_initial, y_initial, x0_borne, y0_borne, x1_borne, y1_borne, x_actuel, y_actuel, self.temps, vitesse))
     
     def deplacement_ligne(self, x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel, temps_dernier_deplacement, vitesse):
+        """ Gère le déplacement linéaire (aller-retour) """
         if self.temps - temps_dernier_deplacement < vitesse:
             return (x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel, temps_dernier_deplacement, vitesse)
         if x_actuel == x_destination and y_actuel == y_destination:
@@ -676,6 +694,7 @@ class Adversaire():
             return ((x_initial, y_initial, x_destination, y_destination, x_actuel, y_actuel, self.temps, vitesse))
 
     def deplacement_carre(self, x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel, temps_dernier_deplacement, vitesse):
+        """ Gère le déplacement du guerrier en carré """
         if self.temps - temps_dernier_deplacement < vitesse:
             return (x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel, temps_dernier_deplacement, vitesse)
         if y_actuel == y1 and x_actuel != x1:
@@ -694,9 +713,9 @@ class Adversaire():
             if y_actuel > y_initial:
                 y_actuel -= 1
             return ((x_initial, y_initial, x1, y1, x2, y2, x3, y3, x_actuel, y_actuel, self.temps, vitesse))
-    
 
 class Etat():
+    """ Gère l'état du jeu, le chargement des niveaux, les transitions et les calculs haute performance """
     def __init__(self):
         self.temps = 0
         self.tic = 1
@@ -735,9 +754,11 @@ class Etat():
             self.afficher_fin()
     
     def ecran_noir(self):
+        """ Affiche un écran noir pour des transitions fluides """
         affiche_matrice(self.ecran_noir_path, 0, 0, delta, "black", "black", tag_ecran_noir)
 
     def transition(self):
+        """ Gère la transition entre les niveaux """
         if carte.niveau_actuel < 3 and carte.niveau_actuel > 0 and brickman.vie_etat:
             carre(cord_transformer(self.transition_X, self.transition_Y, delta), "pink", "black", tag_transition)
         if self.transition_X == brickman.position_X and self.transition_Y == brickman.position_Y and self.transition_etat == False:
@@ -759,6 +780,7 @@ class Etat():
             self.transition_etat = False
 
     def dommage_boss(self):
+        """ Gère les dégâts entre le Boss et Brickman, et supprime les bombes """
         cords_brickman = (brickman.position_X, brickman.position_Y)
         
         if self.dernier_dommage == None:
@@ -784,6 +806,7 @@ class Etat():
             bombe.cords_bombes.remove(piece)
 
     def niveau_chargeur(self):
+        """ Charge les niveaux """
         if not self.niv_charge_etat:
             if carte.niveau_actuel == 1:
                 self.niveau_donnees_dict = parseur(carte.niveau_1_donnees)
@@ -802,6 +825,7 @@ class Etat():
             self.niv_charge_etat = True
 
     def afficher_fin(self):
+        """ Supprime les objets et affiche les crédits de fin """
         global fin_etat 
         carre(cord_transformer(self.fin_position_X, self.fin_position_Y, delta), "pink", "black", tag_transition)
         if brickman.position_X == 5 and brickman.position_Y == 37:
@@ -817,6 +841,7 @@ class Etat():
             Dessin.delete(tag_transition)        
 
 class Objet():
+    """ Gère les objets Kitsoin """
     def __init__(self):
         self.temps = 0
         self.temps_dernier_creation = None
@@ -843,6 +868,7 @@ class Objet():
             carre(cord_transformer(position[0], position[1], delta), "green", "black", tag_kitsoin) 
 
     def position_chargeur(self):
+        """ Gère l'apparition aléatoire et le nombre de kits de soin sur le niveau du Boss """
         if carte.niveau_actuel == 3:
             if boss.sante <= 0:
                 self.kitsoin_positions.clear()
@@ -863,6 +889,7 @@ class Objet():
                 self.kitsoin_positions.add(cords)
     
     def kitsoin_utilisation(self):
+        """ Supprime le kit de soin utilisé """
         if brickman.vie_etat and carte.niveau_actuel == 3:
             for cords in boss.cords_boss():
                 if cords in self.kitsoin_positions:
@@ -882,6 +909,7 @@ class Objet():
                     self.kitsoin_counter -= 1
 
 class Boss():
+    """ Gère le Boss et son comportement """
     def __init__(self):
         self.tic = 50
         self.temps = 0
@@ -930,6 +958,7 @@ class Boss():
             carre(cord_transformer(cords[0], cords[1], delta), "red", "black", tag_boss) 
     
     def boss_controle(self):
+        """ Gère le choix de la direction et le déplacement du Boss """
         if self.temps - self.boss_start > 100 and self.etat_combat == False:
             self.tuto_poser_bombe_etat = False
             self.etat_combat = True
@@ -940,13 +969,16 @@ class Boss():
             self.deplacement(self.cords)
 
     def cords_boss(self):
+        """ Retourne les coordonnées actuelles du Boss """
         cords = [((self.position_X+i, self.position_Y+j)) for i in range(6) for j in range(6)] #6 - boss longueur and hauteur (cube)
         return cords
 
     def choix_deplacement(self):
+        """ Choisit la prochaine position sur l'axe X """
         return ((random.randint(1, 42), 32))
 
     def deplacement(self, cords):
+        """ Gère l'attaque du Boss """
         if self.etat_deplacement_X and self.etat_deplacement_Y:
             self.etat_deplacement = False
             self.etat_deplacement_X = False
@@ -976,6 +1008,7 @@ class Boss():
                 self.tic = 50
 
     def mort(self):
+        """ Gère la mort et l'animation du Boss """
         global fin_etat 
         if boss.sante <= 0 and self.mort_cords != None and len(self.mort_cords) == 0:
             boss.mort_etat = True
@@ -985,6 +1018,7 @@ class Boss():
             self.mort_cords.pop()
 
 class Bombe():
+    """ Gère les bombes sur le niveau du Boss """
     def __init__(self):
         self.temps = 0
         self.tic = 10
@@ -1007,10 +1041,12 @@ class Bombe():
             self.bombe_destructeur()
     
     def creer_bombes(self):
+        """ Affiche les bombes sur la carte """
         for cords in self.cords_bombes:
             carre(cord_transformer(cords[0], cords[1], delta), "grey", "white", tag_bombe)
 
     def ajouter_bombe(self, event):
+        """ Ajoute les coordonnées d'une nouvelle bombe """
         if carte.niveau_actuel == 3 and brickman.vie_etat and boss.sante > 0:
             for cords in self.cords_bombes:
                 if cords[0] == brickman.position_X and cords[1] == brickman.position_Y:
@@ -1018,6 +1054,7 @@ class Bombe():
             self.cords_bombes.add((brickman.position_X, brickman.position_Y, self.temps))
 
     def bombe_destructeur(self):
+        """ Supprime les bombes non utilisées """
         bombes_expirees = [bomb for bomb in self.cords_bombes if self.temps - bomb[2] > 200]
         for bomb in bombes_expirees:
             self.cords_bombes.remove(bomb)
@@ -1034,7 +1071,7 @@ objet = Objet()
 boss = Boss()
 bombe = Bombe()
 
-
+""" Gère toutes les animations (Tic-Tac) """
 def tictac_carte():
     carte.temps = carte.temps+1
     carte.affichage()
@@ -1080,7 +1117,7 @@ def tictac_bombe():
     bombe.affichage()
     Dessin.after(bombe.tic,tictac_bombe)
 
-
+""" Gère les boutons """
 def illumine_moi():
     if not interface.lampe_lumiere_etat:
         interface.lampe_lumiere_etat = True

@@ -1,3 +1,9 @@
+"""
+Auteur: Danyil-Polina BURLAKOV
+Projet: Aventure de Brickman : Les Labyrinthes des Redmans
+Date: Janvier 2026
+"""
+
 import tkinter as tk
 import pnm
 import random
@@ -12,7 +18,7 @@ delta_min = 10
 bg_couleur = "black"
 
 tag_interface = "interface"
-tag_mure = "mure"
+tag_mur = "mur"
 tag_brickman = "brickman"
 tag_adversaire = "adversaire"
 tag_limbo = "limbo"
@@ -48,6 +54,7 @@ def cord_transformer(x, y, delta):
     return (x0, y0, x1, y1)
 
 def affiche_matrice(M, x0, y0, delta, couleur, bordure_couleur, tag):
+        """ Affiche une matrice en noir et blanc (PBM) """
         columns, lines = pnm.dimensions(M)
         for i in range(columns):
             for j in range(lines):
@@ -55,6 +62,7 @@ def affiche_matrice(M, x0, y0, delta, couleur, bordure_couleur, tag):
                     carre(cord_transformer(j+x0, i+y0, delta), couleur, bordure_couleur, tag)
 
 def affiche_matrice_rgb(M, x0, y0, delta, bordure, tag ):
+        """ Affiche une matrice en couleur (PPM) """
         columns, lines = pnm.dimensions(M)
         for i in range(columns):
             for j in range(lines):
@@ -153,6 +161,7 @@ class Interface():
             self.boss_sante_statut()
         
     def creer_lignes(self, delta):
+        """ Trace le quadrillage de l'écran selon la taille delta ou delta_min """
         x0 = 3
         for _ in range(Largeur//delta):
             Dessin.create_line(x0+delta, 0, x0+delta, Hauteur+2, fill='grey')
@@ -163,7 +172,6 @@ class Interface():
             y0 += delta
 
     def creer_ligne_carre(self, x0, y0, x1, y1, couleur, couleur_outline):
-        """ Trace le quadrillage de l'écran selon la taille delta ou delta_min """
         if x0 == x1:
             if y0 < y1:
                 for i in range(y0, y1+1):
@@ -317,10 +325,10 @@ class Carte():
     
     def affichage(self):
         Dessin.delete(tag_tuto)
-        Dessin.delete(tag_mure)
+        Dessin.delete(tag_mur)
         if fin_etat:
             Dessin.delete(tag_tuto)
-            Dessin.delete(tag_mure)
+            Dessin.delete(tag_mur)
         elif self.niveau_actuel == 0 and brickman.vie_etat == True:
             self.tutoriel()
             self.sortie_tuto()
@@ -331,11 +339,11 @@ class Carte():
     def labyrinthe(self):
         """ Dessine les cartes """
         if self.niveau_actuel == 1:
-            affiche_matrice(self.niveau_1, 0, 0, delta, "white", "black", tag_mure)
+            affiche_matrice(self.niveau_1, 0, 0, delta, "white", "black", tag_mur)
         elif self.niveau_actuel == 2:
-            affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mure)
+            affiche_matrice(self.niveau_2, 0, 0, delta, "white", "black", tag_mur)
         elif self.niveau_actuel == 3:
-            affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mure)
+            affiche_matrice(self.niveau_boss, 0, 0, delta, "white", "black", tag_mur)
     
     def tutoriel(self):
         """ Gère le tutoriel au début du jeu """
@@ -412,7 +420,7 @@ class Brickman():
             if self.position_Y == 0:
                 return
             elif carte.collision(self.position_X, self.position_Y-1):
-                carre(cord_transformer(self.position_X, self.position_Y-1, delta), "red", "black", tag_mure)
+                carre(cord_transformer(self.position_X, self.position_Y-1, delta), "red", "black", tag_mur)
                 return 
             self.position_Y -= 1
         elif not brickman.vie_etat:
@@ -435,7 +443,7 @@ class Brickman():
             if self.position_Y == Hauteur//delta-1:
                 return 
             elif carte.collision(self.position_X, self.position_Y+1):
-                carre(cord_transformer(self.position_X, self.position_Y+1, delta), "red", "black", tag_mure)
+                carre(cord_transformer(self.position_X, self.position_Y+1, delta), "red", "black", tag_mur)
                 return
             self.position_Y += 1
         elif not brickman.vie_etat:
@@ -456,7 +464,7 @@ class Brickman():
             if self.position_X == 0:
                 return 
             elif carte.collision(self.position_X-1, self.position_Y):
-                carre(cord_transformer(self.position_X-1, self.position_Y, delta), "red", "black", tag_mure)
+                carre(cord_transformer(self.position_X-1, self.position_Y, delta), "red", "black", tag_mur)
                 return
             self.position_X -= 1
         elif not brickman.vie_etat:
@@ -477,7 +485,7 @@ class Brickman():
             if self.position_X == Largeur//delta-1:
                 return 
             elif carte.collision(self.position_X+1, self.position_Y):
-                carre(cord_transformer(self.position_X+1, self.position_Y, delta), "red", "black", tag_mure)
+                carre(cord_transformer(self.position_X+1, self.position_Y, delta), "red", "black", tag_mur)
                 return
             self.position_X += 1
         elif not brickman.vie_etat:
@@ -493,7 +501,7 @@ class Brickman():
             if not self.deplacement_etat: 
                 Dessin.delete(tag_brickman)
             Dessin.delete(tag_bombe)
-            Dessin.delete(tag_mure)
+            Dessin.delete(tag_mur)
             Dessin.delete(tag_transition)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_interface)
@@ -765,7 +773,7 @@ class Etat():
             if carte.niveau_actuel < 3:
                 carte.niveau_actuel += 1
             self.niv_charge_etat = False
-            Dessin.delete(tag_mure)
+            Dessin.delete(tag_mur)
             Dessin.delete(tag_adversaire)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_brickman)
@@ -835,7 +843,7 @@ class Etat():
             Dessin.delete(tag_bombe)
             Dessin.delete(tag_boss)
             Dessin.delete(tag_brickman)
-            Dessin.delete(tag_mure)
+            Dessin.delete(tag_mur)
             Dessin.delete(tag_interface)
             Dessin.delete(tag_kitsoin)
             Dessin.delete(tag_transition)        
@@ -1071,7 +1079,7 @@ objet = Objet()
 boss = Boss()
 bombe = Bombe()
 
-""" Gère toutes les animations (Tic-Tac) """
+""" Gèrent toutes les animations (Tic-Tac) """
 def tictac_carte():
     carte.temps = carte.temps+1
     carte.affichage()
@@ -1117,7 +1125,7 @@ def tictac_bombe():
     bombe.affichage()
     Dessin.after(bombe.tic,tictac_bombe)
 
-""" Gère les boutons """
+""" Gèrent les boutons """
 def illumine_moi():
     if not interface.lampe_lumiere_etat:
         interface.lampe_lumiere_etat = True

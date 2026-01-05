@@ -77,6 +77,13 @@ To run this project, you need:
 * `/donnees`: `.txt` files containing object and enemy positions.
 * `/interface`: Sprites and graphical elements (logo, menu, textures).
 
+## Known Issues
+
+Despite the tests performed, some technical limitations related to the Tkinter library remain:
+
+* **Performance Dependency:** The movement speed and damage rate of the "Redmans" (enemies) may vary depending on the host machine's CPU performance.
+* **Linux Display:** A slight rendering offset (approx. 3px on the top and left borders) may appear on Linux distributions due to window manager specificities.
+
 ## Author
 
 Project created by **Danyil-Polina Burlakov** as part of the **1st Year Computer Science Bachelor (L1)** at **Université Côte d'Azur**.

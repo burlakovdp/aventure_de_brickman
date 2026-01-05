@@ -2,6 +2,7 @@
 Auteur: Danyil-Polina BURLAKOV
 Projet: Aventure de Brickman : Les Labyrinthes des Redmans
 Date: Janvier 2026
+Lien GitHub: https://github.com/burlakovdp/aventure_de_brickman
 """
 
 import tkinter as tk

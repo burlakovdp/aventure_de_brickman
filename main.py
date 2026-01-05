@@ -290,6 +290,7 @@ class Limbo():
                         boss.etat_deplacement = False
                         boss.etat_deplacement_X = False
                         boss.etat_deplacement_Y = False
+                        boss.tic = 50
                         boss.affichage()
                 Dessin.delete(tag_limbo)
                 adversaire.affichage()

@@ -76,6 +76,7 @@ To run this project, you need:
 * `/cartes`: Contains `.pbm` files representing the level architecture.
 * `/donnees`: `.txt` files containing object and enemy positions.
 * `/interface`: Sprites and graphical elements (logo, menu, textures).
+* `/limbo`: Contains graphical assets for the "Limbo" state (respawn zone).
 
 ## Known Issues
 
